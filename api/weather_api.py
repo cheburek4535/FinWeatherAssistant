@@ -41,39 +41,6 @@ def get_weather(city: str, api_key: str) -> dict:
         logger.error(f"Ошибка запроса погоды: {e}")
         return None
 
-print(get_weather("London", weather_api_key))
+#print(get_weather("Сочи", weather_api_key))
 
 
-# import logging
-# import requests
-#
-# logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-#
-# logger = logging.getLogger(__name__)
-#
-#
-# def get_weather(city: str, api_key: str) -> dict:
-#     """
-#     Получает текущую погоду для указанного города
-#     :param city: Название города (например "Москва")
-#     :param api_key: Ваш API-ключ OpenWeatherMap
-#     :return: Словарь с данными о погоде
-#     """
-#     base_url = "http://api.openweathermap.org/data/2.5/weather?"
-#
-#     params = {
-#         "q": city,
-#         "appid": api_key,
-#         "units": "metric",
-#         "lang": "ru"
-#     }
-#
-#     try:
-#         response = requests.get(base_url, params=params)
-#         response.raise_for_status()
-#
-#         data = response.json()
-#
-#         return {
-#
-#         }

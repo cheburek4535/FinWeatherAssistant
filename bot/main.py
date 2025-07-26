@@ -2,6 +2,9 @@ import logging
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
 
+import api.weather_api
+
+
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -17,7 +20,7 @@ def get_main_keyboard():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_text(
-        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
+        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент. {api.weather_api.get_weather("Москва", api.weather_api.weather_api_key)}",
         reply_markup=get_main_keyboard()
     )
 
