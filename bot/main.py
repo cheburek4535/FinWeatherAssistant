@@ -23,4 +23,10 @@ def start(update: Update, context: CallbackContext) -> None:
 def main() -> None:
     updater = Updater("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU")
     dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler("start", start))
 
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
