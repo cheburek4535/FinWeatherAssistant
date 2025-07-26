@@ -1,8 +1,9 @@
 import logging
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters, CallbackContext
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
+
 logging.basicConfig(
-    'format=%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
@@ -13,20 +14,20 @@ def get_main_keyboard():
         ["📊 История запросов", "⚙️ Настройки"]
     ], resize_keyboard=True)
 
-def start(update: Update, context: CallbackContext) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    update.message.reply_text(
-        f"Привет, {user.first_name}!, Я твой финансово-погодный ассистент.",
+    await update.message.reply_text(
+        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
         reply_markup=get_main_keyboard()
     )
 
 def main() -> None:
-    updater = Updater("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU")
-    dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler("start", start))
+    application = ApplicationBuilder().token("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU").build()
 
-    updater.start_polling()
-    updater.idle()
+    application.add_handler(CommandHandler("start", start))
+
+    application.run_polling()
+
 
 if __name__ == '__main__':
     main()
