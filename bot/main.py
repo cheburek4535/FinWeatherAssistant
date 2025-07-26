@@ -20,7 +20,7 @@ def get_main_keyboard():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_text(
-        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент. {api.weather_api.get_weather("Москва", api.weather_api.weather_api_key)}",
+        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
         reply_markup=get_main_keyboard()
     )
 
