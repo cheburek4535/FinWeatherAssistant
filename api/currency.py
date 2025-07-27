@@ -86,3 +86,5 @@ def get_currency_rates(base: str = 'USD') -> dict:
         return None
 
 print(get_currency_rates('USD'))
+print(get_currency_rates('EUR'))
+print(get_currency_rates('CNY'))
