@@ -15,4 +15,7 @@ def save_request(user_id: int, req_type: str, req_data: str, resp_data: str):
         session.commit()
 
     except Exception as e:
-        logger.session.rollback()
+        session.rollback()
+        logger.error(f"Ошибка пря сохранении данных в БД{e}")
+    finally:
+        session.close()
