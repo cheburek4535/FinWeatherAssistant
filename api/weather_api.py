@@ -1,11 +1,7 @@
 import requests
-import logging
+from Logger.my_logger import logger
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+
 
 weather_api_key = "2a27c5db9a8bd093c75fc9f50314845d"
 def get_weather(city: str, api_key: str) -> dict:

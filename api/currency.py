@@ -1,9 +1,8 @@
 import requests
 from datetime import datetime
-import logging
+from Logger.my_logger import logger
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(level)s -%(message)s', level = logging.INFO)
-logger = logging.getLogger(__name__)
+
 
 
 def get_currency_rates(base: str = 'USD') -> dict:
