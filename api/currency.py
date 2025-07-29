@@ -6,37 +6,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(level)s -%(message)s', le
 logger = logging.getLogger(__name__)
 
 
-# def get_currency_rates(base: str = "USD") -> dict:
-#     """
-#     Получает текущие курсы валют от ЦБ РФ
-#     :param base: Базовая валюта (по умолчанию USD)
-#     :return: Словарь с курсами валют
-#     """
-#     url = "https://www.cbr-xml-daily.ru/daily_json.js"
-#
-#     try:
-#         response = requests.get(url)
-#         response.raise_for_status()
-#
-#         data = response.json()
-#         rates = {}
-#
-#         for currency_code, currency_data in data['Valute'].items():
-#             rates[currency_code] = {
-#                 'name': currency_data['Name'],
-#                 'value': currency_data['Value'],
-#                 'previous': currency_data['Previous']
-#             }
-#
-#         return {
-#             'timestamp': datetime.now().isoformat(),
-#             'base': base,
-#             'rates': rates
-#         }
-#     except requests.exceptions.RequestException as e:
-#         logger.error(f"Ошибка запроса курсов валют: {e}")
-#         return None
-
 def get_currency_rates(base: str = 'USD') -> dict:
     """
         Получаем курс указанной валюты к рублю по данным ЦБ РФ.
