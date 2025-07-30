@@ -27,11 +27,11 @@ def get_weather(city: str, api_key: str) -> dict:
 
         # Извлекаем нужные данные
         return {
-            '🌆Город': data['name'],
-            '🌡️Температура': data['main']['temp'],
-            '🤗Ощущается как': data['main']['feels_like'],
-            '🌥️Общее состояние': data['weather'][0]['description'],
-            '💧Влажность': data['main']['humidity']
+            'city': data['name'],
+            'temp': data['main']['temp'],
+            'feels_like': data['main']['feels_like'],
+            'description': data['weather'][0]['description'],
+            'humidity': data['main']['humidity']
         }
     except requests.exceptions.RequestException as e:
         logger.error(f"Ошибка запроса погоды: {e}")
