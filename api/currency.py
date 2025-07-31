@@ -35,10 +35,10 @@ def get_currency_rates(base: str = 'USD') -> dict:
         data = response.json()
         valutes = data.get('Valute', {})
 
-        if base.upper() not in valutes:
-            logger.error(f"Валюта {base} не найдена в данных ЦБ РФ")
-            return None
-        elif base.upper() in valutes:
+        # if base.upper() not in valutes:
+        #     logger.error(f"Валюта {base} не найдена в данных ЦБ РФ")
+        #     return None
+        if base.upper() in valutes:
             currency_data = valutes[base.upper()]
 
             return {
@@ -57,7 +57,7 @@ def get_currency_rates(base: str = 'USD') -> dict:
                 candidates.append((code, info['Name']))
 
         if len(candidates) == 1:
-            currency_data = valutes(candidates[0][0])
+            currency_data = valutes.get(candidates[0][0])
             return {
                 'timestamp': datetime.now().isoformat(),
                 'base': candidates[0][0],
