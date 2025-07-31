@@ -27,6 +27,12 @@ async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await update.message.reply_text("Введите название города:")
     context.user_data['waiting_for'] = 'weather_city'
 
+# обработчик кнопки курсы валют
+async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("Введетие назавание валюты:")
+    context.user_data['waiting_for'] = 'currency_valute'
+
+
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
     user_data = context.user_data
@@ -55,6 +61,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
+    if user_data.get("waiting_for") == "currency_valute":
+        currency_data = get_currency_rates(text)
 
 
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
