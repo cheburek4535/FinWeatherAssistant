@@ -29,6 +29,8 @@ def get_currency_rates(base: str = 'USD') -> dict:
             'name': 'Российский рубль'
         }
 
+
+
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -38,6 +40,17 @@ def get_currency_rates(base: str = 'USD') -> dict:
         # if base.upper() not in valutes:
         #     logger.error(f"Валюта {base} не найдена в данных ЦБ РФ")
         #     return None
+        if base.lower() in ["dol", "dollar", "бакс", "доллар", "американский доллар", "американская валюта", "ljkkfh",
+                            ",frc"]:
+            dollar_currency = valutes['USD']
+            return {
+                'timestamp': datetime.now().isoformat(),
+                'base': 'USD',
+                'rate': dollar_currency['Value'],
+                'previous': dollar_currency['Previous'],
+                'name': 'Американский доллар'
+            }
+
         if base.upper() in valutes:
             currency_data = valutes[base.upper()]
 
@@ -76,7 +89,6 @@ def get_currency_rates(base: str = 'USD') -> dict:
         logger.error(f"Ошибка запроса курсов валют: {e}")
         return None
 
-print(get_currency_rates('Евро'))
-print(get_currency_rates('EUR'))
-print(get_currency_rates('CNY'))
-print(get_currency_rates("Австралийский доллар"))
+# print(get_currency_rates('Евро'))
+# print(get_currency_rates('EUR'))
+# print(get_currency_rates('бакс'))

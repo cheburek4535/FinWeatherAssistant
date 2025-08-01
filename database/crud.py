@@ -1,4 +1,4 @@
-from .models import Session, UserRequest
+from database.models import Session, UserRequest
 from Logger.my_logger import logger
 def save_request(user_id: int, req_type: str, req_data: str, resp_data: str):
     """Сохраняет запрос пользователя в БД"""
@@ -13,9 +13,9 @@ def save_request(user_id: int, req_type: str, req_data: str, resp_data: str):
 
         session.add(new_request)
         session.commit()
-
+        logger.info(f"Запрос сохранен в БД: ID={new_request.id}")
     except Exception as e:
         session.rollback()
-        logger.error(f"Ошибка пря сохранении данных в БД{e}")
+        logger.error(f"Ошибка при сохранении данных в БД{e}")
     finally:
         session.close()
