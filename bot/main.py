@@ -29,7 +29,7 @@ async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 # обработчик кнопки курсы валют
 async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название валюты:")
+    await update.message.reply_text("Введите название валюты в родительном падеже :")
     context.user_data['waiting_for'] = 'currency_valute'
 
 async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
