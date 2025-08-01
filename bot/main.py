@@ -61,9 +61,17 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
+
+
     if user_data.get("waiting_for") == "currency_valute":
         currency_data = get_currency_rates(text)
 
+        if currency_data:
+            response = (
+                f"Курс валюты: {currency_data['name']}:\n"
+                f"Время: {currency_data['time']}\n"
+                f"Текущий курс: {currency_data['rate']}₽"
+            )
 
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")
