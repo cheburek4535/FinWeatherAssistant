@@ -3,13 +3,13 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request
-from bot.keyboard import get_main_keyboard, start, get_currency_keyboard
-
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard
+from api.geolocation import get_city_from_location, handle_location
 
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название города:")
+    await update.message.reply_text("Введите название города,\nили отправьте геолокацию:", reply_markup=get_location_keyboard())
     context.user_data['waiting_for'] = 'weather_city'
 
 # обработчик кнопки курсы валют
@@ -28,6 +28,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     if user_data.get('waiting_for') == 'weather_city':
         # Получаем погоду для введеного города
+
         weather_data = get_weather(text, weather_api_key)
 
         if weather_data:
@@ -40,6 +41,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             )
             save_request(
                 user_id=update.effective_user.id,
+                user_name=update.effective_user.name,
                 req_type="weather",
                 req_data=text,
                 resp_data=response
@@ -74,6 +76,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
             save_request(
                 user_id=update.effective_user.id,
+                user_name=update.effective_user.name,
                 req_type='currency',
                 req_data=str(text),
                 resp_data=response
@@ -102,7 +105,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
 
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
-
+    application.add_handler(MessageHandler(filters.LOCATION, handle_location))
     application.run_polling()
 
 

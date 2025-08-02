@@ -12,6 +12,7 @@ class UserRequest(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=False)
+    user_name = Column(String, nullable=False)
     request_type = Column(String(20), nullable=False)
     request_data = Column(String(100), nullable=False)
     response_data = Column(String(500), nullable=False)

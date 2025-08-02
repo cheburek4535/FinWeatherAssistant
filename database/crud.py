@@ -1,11 +1,12 @@
 from database.models import Session, UserRequest
 from Logger.my_logger import logger
-def save_request(user_id: int, req_type: str, req_data: str, resp_data: str):
+def save_request(user_id: int, user_name: str, req_type: str, req_data: str, resp_data: str):
     """Сохраняет запрос пользователя в БД"""
     session = Session()
     try:
         new_request = UserRequest(
             user_id=user_id,
+            user_name=user_name,
             request_type=req_type,
             request_data=req_data,
             response_data=str(resp_data)

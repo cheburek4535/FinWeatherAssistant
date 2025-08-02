@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
 
 def get_main_keyboard():
@@ -19,3 +19,10 @@ def get_currency_keyboard():
         ['$ Доллар 💵', '€ Евро 💶'],
         ['¥ Юань 💴', '£ Фунт стерлингов 💷']
     ], resize_keyboard=True)
+
+def get_location_keyboard():
+    keyboard = [
+        [KeyboardButton(text="Отправить мой город", request_location=True)]
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
+
