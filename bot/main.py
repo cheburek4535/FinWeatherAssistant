@@ -1,24 +1,9 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
-
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request
-
-
-def get_main_keyboard():
-    return ReplyKeyboardMarkup([
-        ["🌤️ Получить погоду", "💵 Курс валют"],
-        ["📊 История запросов", "⚙️ Настройки"]
-    ], resize_keyboard=True)
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user = update.effective_user
-    await update.message.reply_text(
-        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
-        reply_markup=get_main_keyboard()
-    )
-
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard
 
 
 
@@ -29,11 +14,13 @@ async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 # обработчик кнопки курсы валют
 async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название валюты в родительном падеже :")
+    await update.message.reply_text("Введите название валюты в родительном падеже,\nили выберите из списка:", reply_markup=get_currency_keyboard())
     context.user_data['waiting_for'] = 'currency_valute'
 
 async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data['waiting_for'] = 'story'
+
+
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
     user_data = context.user_data
@@ -65,7 +52,16 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
 
     elif user_data.get("waiting_for") == "currency_valute":
-        currency_data = get_currency_rates(text)
+        if text == "€ Евро 💶":
+            currency_data = get_currency_rates('евро')
+        elif text == "$ Доллар 💵":
+            currency_data = get_currency_rates('доллар')
+        elif text == "£ Фунт стерлингов 💷":
+            currency_data = get_currency_rates("фунт стерлингов")
+        elif text == "¥ Юань 💴":
+            currency_data = get_currency_rates("юань")
+        else:
+            currency_data = get_currency_rates(text)
 
         if currency_data:
             response = (
@@ -79,7 +75,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             save_request(
                 user_id=update.effective_user.id,
                 req_type='currency',
-                req_data=text,
+                req_data=str(text),
                 resp_data=response
             )
         else:

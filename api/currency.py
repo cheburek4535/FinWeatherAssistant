@@ -57,7 +57,7 @@ def get_currency_rates(base: str = 'USD') -> dict:
             return {
                 'timestamp': datetime.now().isoformat(),
                 'base': base.upper(),
-                'rate': currency_data['Value'],
+                'rate': currency_data['Value'] / currency_data['Nominal'],
                 'previous': currency_data['Previous'] / currency_data['Nominal'],
                 'name': currency_data['Name']
             }
@@ -75,7 +75,7 @@ def get_currency_rates(base: str = 'USD') -> dict:
                 'timestamp': datetime.now().isoformat(),
                 'base': candidates[0][0],
                 'rate': currency_data['Value'] / currency_data['Nominal'],
-                'previous': currency_data['Previous'],
+                'previous': currency_data['Previous'] / currency_data['Nominal'],
                 'name': currency_data['Name']
             }
         elif len(candidates) > 1:
