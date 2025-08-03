@@ -16,7 +16,10 @@ class UserRequest(Base):
     request_type = Column(String(20), nullable=False)
     request_data = Column(String(100), nullable=False)
     response_data = Column(String(500), nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now)
+
+
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "assistant.db")
@@ -26,3 +29,4 @@ engine = create_engine(f'sqlite:///{DB_PATH}')
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)
+
