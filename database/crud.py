@@ -31,6 +31,7 @@ def show_story(user_id):
     lines = []
     for req in user_story:
         time_str = req.timestamp.isoformat()[11:16] if req.timestamp else "No timestamp"
+
         line = f"{time_str} - {req.request_data}"
         lines.append(line)
 
@@ -40,6 +41,3 @@ def show_story(user_id):
 story_lines = show_story(6278046215)
 
 #for line in story_lines:
-    #print(line)
-
-
