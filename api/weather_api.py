@@ -21,6 +21,7 @@ def get_weather(city: str, api_key: str) -> dict:
 
     try:
         response = requests.get(base_url, params=params)
+        print(base_url, params)
         response.raise_for_status()  # Проверка ошибок HTTP
 
         data = response.json()
@@ -37,7 +38,7 @@ def get_weather(city: str, api_key: str) -> dict:
         logger.error(f"Ошибка запроса погоды: {e}")
         return None
 
-#print(get_weather("Сочи", weather_api_key))
+print(get_weather("Сочи", weather_api_key))
 
 
 
