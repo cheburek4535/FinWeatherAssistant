@@ -17,7 +17,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def get_currency_keyboard():
     return ReplyKeyboardMarkup([
         ['$ Доллар 💵', '€ Евро 💶'],
-        ['¥ Юань 💴', '£ Фунт стерлингов 💷']
+        ['¥ Юань 💴', '£ Фунт стерлингов 💷'],
+        ['⬅️Назад']
     ], resize_keyboard=True)
 
 def get_location_keyboard():

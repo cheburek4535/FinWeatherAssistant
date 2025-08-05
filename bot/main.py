@@ -18,9 +18,17 @@ async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     context.user_data['waiting_for'] = 'currency_valute'
 
 async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Нажмите на кнопку ниже, пожалуйста",
-                                    reply_markup=get_story_keyboard())
-    context.user_data['waiting_for'] = 'story'
+    user_id = update.effective_user.id
+    story = show_story(user_id)
+    if story:
+        response = (
+
+            "\n".join(story)
+        )
+    else:
+        response = "Не удалось получить данные об истории запросов 😔."
+
+    await update.message.reply_text(response, reply_markup=get_main_keyboard())
 
 
 # Обработчик текстовых сообщений
@@ -90,19 +98,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
 
-    elif user_data.get('waiting_for') == "story":
-        user_id = update.effective_user.id
-        story = show_story(user_id)
-        if story:
-            response = (
-
-                 "\n".join(story)
-            )
-        else:
-            response = "Не удалось получить данные об истории запросов 😔."
-
-        await update.message.reply_text(response, reply_markup=get_main_keyboard())
-        user_data['waiting_for'] = None
+    
 
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")
