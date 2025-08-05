@@ -5,7 +5,7 @@ from api.currency import get_currency_rates
 from database.crud import save_request, show_story
 from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_story_keyboard
 from api.geolocation import handle_location
-
+from api.timezone import get_local_time_by_city
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -39,7 +39,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 f"🌡️Температура: {weather_data['temp']}°C\n"
                 f"🤗Ощущается как: {weather_data['feels_like']}°C\n"
                 f"🌥️Общее состояние: {weather_data['description']}\n"
-                f"💧Влажность: {weather_data['humidity']}%"
+                f"💧Влажность: {weather_data['humidity']}\n"
+                f"🕒Местное время: {get_local_time_by_city(text)}"
             )
             save_request(
                 user_id=update.effective_user.id,
