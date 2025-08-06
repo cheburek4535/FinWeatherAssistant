@@ -41,3 +41,5 @@ def show_story(user_id):
 story_lines = show_story(6278046215)
 
 #for line in story_lines:
+
+#print(show_story(6278046215))

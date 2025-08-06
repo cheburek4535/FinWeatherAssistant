@@ -112,7 +112,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
     application.add_handler(MessageHandler(filters.Regex("^📊 История запросов$"), story_handler))
-
+    application.add_handler(MessageHandler(filters.Regex("^Назад"), get_main_keyboard))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))
     application.run_polling()
