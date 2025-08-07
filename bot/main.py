@@ -30,7 +30,10 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await update.message.reply_text(response, reply_markup=get_main_keyboard())
 
-
+async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_data = context.user_data
+    get_main_keyboard()
+    user_data['waiting_for'] = None
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
     user_data = context.user_data
@@ -40,7 +43,6 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         # Получаем погоду для введеного города
 
         weather_data = get_weather(text, weather_api_key)
-
         if weather_data:
             response = (
                 f"🌆Погода в городе {weather_data['city']}:\n"
@@ -58,8 +60,9 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 resp_data=response
             )
         else:
-            response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
-
+             response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
+        if text == "⬅️Назад":
+            response = "Возвращено назад"
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
 
@@ -95,6 +98,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         else:
             response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!"
 
+        if text == "⬅️Назад":
+            response = "Возвращено назад"
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
 
@@ -112,7 +117,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
     application.add_handler(MessageHandler(filters.Regex("^📊 История запросов$"), story_handler))
-    application.add_handler(MessageHandler(filters.Regex("^Назад"), get_main_keyboard))
+    #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))
     application.run_polling()

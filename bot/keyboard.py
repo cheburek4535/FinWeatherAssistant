@@ -23,11 +23,13 @@ def get_currency_keyboard():
 
 def get_location_keyboard():
     keyboard = [
-        [KeyboardButton(text="Отправить мой город", request_location=True)]
+        [KeyboardButton(text="Отправить мой город", request_location=True)],
+        ['⬅️Назад']
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
 
 def get_story_keyboard():
     return ReplyKeyboardMarkup([
-        ['Получить историю запросов']
+        ['Получить историю запросов'],
+        ['⬅️Назад']
     ], resize_keyboard=True)
