@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request, show_story
-from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_story_keyboard
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_add_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
 
@@ -29,6 +29,7 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         response = "Не удалось получить данные об истории запросов 😔."
 
     await update.message.reply_text(response, reply_markup=get_main_keyboard())
+async def add_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
@@ -116,7 +117,7 @@ def main() -> None:
 
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
-    application.add_handler(MessageHandler(filters.Regex("^📊 История запросов$"), story_handler))
+    application.add_handler(MessageHandler(filters.Regex("^📔 История запросов$"), story_handler))
     #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))

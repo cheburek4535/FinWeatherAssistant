@@ -5,7 +5,7 @@ from Logger.my_logger import logger
 
 
 
-def get_currency_rates(base: str = 'USD') -> dict:
+def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
     """
         Получаем курс указанной валюты к рублю по данным ЦБ РФ.
         :param base: Код валюты (например, 'USD', 'EUR'), базовая валюта относительно рубля.
@@ -36,6 +36,14 @@ def get_currency_rates(base: str = 'USD') -> dict:
         response.raise_for_status()
         data = response.json()
         valutes = data.get('Valute', {})
+
+        if get_all:
+            all_data = valutes
+
+            return {
+                'name': all_data['Name'],
+                'rate': all_data['Value']
+            }
 
         # if base.upper() not in valutes:
         #     logger.error(f"Валюта {base} не найдена в данных ЦБ РФ")
@@ -92,3 +100,5 @@ def get_currency_rates(base: str = 'USD') -> dict:
 # print(get_currency_rates('Евро'))
 # print(get_currency_rates('EUR'))
 # print(get_currency_rates('бакс'))
+
+print(get_currency_rates('AUD', get_all=True))
