@@ -38,7 +38,7 @@ def show_story(user_id):
     session.close()
     return lines
 
-story_lines = show_story(6278046215)
+#story_lines = show_story(6278046215)
 
 #for line in story_lines:
 

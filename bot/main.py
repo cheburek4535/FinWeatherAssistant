@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup
+from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
@@ -30,8 +30,17 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     await update.message.reply_text(response, reply_markup=get_main_keyboard())
 async def add_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    inline_keyboard = [
+            [InlineKeyboardButton("Включить рассылку", callback_data='daily_on'),
+             InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
+        ]
+    reply_markup = InlineKeyboardMarkup(inline_keyboard)
+    await update.message.reply_text('Вы можете включить ежедневную рассылку уведомления о погоде и курсах валют.\n'
+                                    'Просто укажите время, валюту или город нажав кнопку ниже.\n'
+                                    'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже', reply_markup=reply_markup)
 
-async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+#async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
     get_main_keyboard()
     user_data['waiting_for'] = None
@@ -118,6 +127,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
     application.add_handler(MessageHandler(filters.Regex("^📔 История запросов$"), story_handler))
+    application.add_handler(MessageHandler(filters.Regex("^⚙️ Дополнительно$"), add_handler))
     #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))

@@ -1,5 +1,5 @@
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, Updater
 
 def get_main_keyboard():
     return ReplyKeyboardMarkup([
@@ -38,3 +38,4 @@ def get_add_keyboard():
     return ReplyKeyboardMarkup([
         ['📊Список всех валют с курсами']
     ], resize_keyboard=True)
+

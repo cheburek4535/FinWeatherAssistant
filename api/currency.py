@@ -101,4 +101,4 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
 # print(get_currency_rates('EUR'))
 # print(get_currency_rates('бакс'))
 
-print(get_currency_rates('AUD', get_all=True))
+#print(get_currency_rates('AUD', get_all=True))
