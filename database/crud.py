@@ -2,7 +2,7 @@ from pip._internal import req
 
 from database.models import Session, UserRequest
 from Logger.my_logger import logger
-from datetime import datetime
+
 def save_request(user_id: int, user_name: str, req_type: str, req_data: str, resp_data: str):
     """Сохраняет запрос пользователя в БД"""
     session = Session()

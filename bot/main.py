@@ -1,11 +1,14 @@
-from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request, show_story
-from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_add_keyboard
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
+from bot.daily import button_handler, daily_handler
+import csv
+from pathlib import Path
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -29,15 +32,8 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         response = "Не удалось получить данные об истории запросов 😔."
 
     await update.message.reply_text(response, reply_markup=get_main_keyboard())
-async def add_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    inline_keyboard = [
-            [InlineKeyboardButton("Включить рассылку", callback_data='daily_on'),
-             InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
-        ]
-    reply_markup = InlineKeyboardMarkup(inline_keyboard)
-    await update.message.reply_text('Вы можете включить ежедневную рассылку уведомления о погоде и курсах валют.\n'
-                                    'Просто укажите время, валюту или город нажав кнопку ниже.\n'
-                                    'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже', reply_markup=reply_markup)
+
+
 
 
 #async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -113,7 +109,22 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
 
-    
+    elif user_data.get("waiting_for") == "confirm_daily_city":
+        file_path = Path(__file__).parent.parent / 'database' / 'city.csv'
+        cities = set()
+
+        with open(file_path, 'r', encoding='cp1251', newline='') as csvfile:
+            reader = csv.DictReader(csvfile, delimiter=';')
+            for row in reader:
+                city_name = row['name']
+                cities.add(city_name)
+        user_city = text
+        if user_city in cities:
+            response = f"Отлично! Теперь вы будете получать погоду в городе: {user_city}"
+        else:
+            response = "Город не найден. Попробуйте отправить вашу геолокацию"
+
+        await update.message.reply_text(response, reply_markup=get_main_keyboard())
 
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")
@@ -127,7 +138,8 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
     application.add_handler(MessageHandler(filters.Regex("^📔 История запросов$"), story_handler))
-    application.add_handler(MessageHandler(filters.Regex("^⚙️ Дополнительно$"), add_handler))
+    application.add_handler(MessageHandler(filters.Regex("^📬 Рассылка$"), daily_handler))
+    application.add_handler(CallbackQueryHandler(button_handler))
     #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))

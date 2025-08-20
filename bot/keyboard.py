@@ -1,10 +1,10 @@
-from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, Updater
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import ContextTypes
 
 def get_main_keyboard():
     return ReplyKeyboardMarkup([
         ["🌤️ Получить погоду", "💵 Курс валют"],
-        ["📔 История запросов", "⚙️ Дополнительно"]
+        ["📔 История запросов", "📬 Рассылка"]
     ], resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

@@ -1,9 +1,8 @@
 import requests
-from telegram.ext import MessageHandler, filters, CallbackContext
+from telegram.ext import CallbackContext
 from telegram import Update
 from api.weather_api import get_weather, weather_api_key
 from bot.keyboard import get_main_keyboard
-from Logger.my_logger import logger
 from database.crud import save_request
 
 def get_city_from_location(latitude, longitude):
