@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
-from database.crud import save_request, show_story
+from database.crud import save_request, show_story, save_daily_config
 from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
@@ -120,9 +120,13 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 cities.add(city_name)
         user_city = text
         if user_city in cities:
+            user_data["daily_city"] = user_city
             response = f"Отлично! Теперь вы будете получать погоду в городе: {user_city}"
+
         else:
             response = "Город не найден. Попробуйте отправить вашу геолокацию"
+
+
 
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
 

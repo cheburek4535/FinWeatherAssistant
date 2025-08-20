@@ -19,6 +19,17 @@ class UserRequest(Base):
     timestamp = Column(DateTime, default=datetime.now)
 
 
+class DailyConfig(Base):
+    __tablename__ = 'daily_configs'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, nullable=False)
+    user_name = Column(String, nullable=False)
+    daily_type = Column(String(20), nullable=False)
+    daily_city = Column(String(200), nullable=True)
+    daily_valute = Column(String(100), nullable=True)
+    daily_schedule = Column(String(20), nullable=False)
+    timestamp = Column(DateTime, default=datetime.now)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

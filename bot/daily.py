@@ -56,19 +56,48 @@ async def daily_city_set(update: Update, context: CallbackContext):
     user_data = context.user_data
     user_data["waiting_for"] = 'confirm_daily_city'
 
-
+async def daily_valute_set(update: Update, context: CallbackContext):
+    await update.callback_query.edit_message_text("Напишите название валюты для рассылки курса:")
+    user_data = context.user_data
+    user_data["waiting_for"] = 'confirm_daily_valute'
 
 async def button_handler(update: Update, context: CallbackContext):
     query = update.callback_query
+    data = query.data
     await query.answer()
-    if query.data in ('daily_on', 'back_to_daily_on'):
+    if data in ('daily_on', 'back_to_daily_on'):
         await daily_on(update, context)
 
-    elif query.data in ('daily_is_weather', 'daily_is_currency', 'daily_is_both'):
+    elif data in ('daily_is_weather', 'daily_is_currency', 'daily_is_both'):
+        if data == 'daily_is_weather':
+            context.user_data['daily_type'] = 'weather'
+        elif data == 'daily_is_currency':
+            context.user_data['daily_type'] = 'currency'
+        elif data == 'daily_is_both':
+            context.user_data['daily_type'] = 'both'
         await daily_timing_set(update, context)
 
-    elif query.data == 'back_to_daily_handler':
+    elif data == 'back_to_daily_handler':
         await daily_handler(update, context)
 
-    elif query.data in ('daily_in_morning', 'daily_in_afternoon', 'daily_in_evening', 'daily_in_morning_and_afternoon', 'daily_in_three', 'daily_in_afternoon_and_evening', 'daily_in_morning_and_evening'):
-        await daily_city_set(update, context)
+    elif data in ('daily_in_morning', 'daily_in_afternoon', 'daily_in_evening', 'daily_in_morning_and_afternoon', 'daily_in_three', 'daily_in_afternoon_and_evening', 'daily_in_morning_and_evening'):
+        schedule_map = {
+            'daily_in_morning': 'Mon',
+            'daily_in_afternoon': 'Aft',
+            'daily_in_evening': 'Evn',
+            'daily_in_morning_and_afternoon': 'MonAft',
+            'daily_in_morning_and_evening': 'MonEvn',
+            'daily_in_afternoon_and_evening': 'AftEvn',
+            'daily_in_three': 'MonAftEvn',
+        }
+
+        context.user_data['daily_schedule'] = schedule_map.get(data, '')
+
+        daily_type = context.user_data['daily_type']
+        if daily_type == 'weather':
+            await daily_city_set(update, context)
+        elif daily_type == 'currency':
+            await daily_valute_set(update, context)
+        elif daily_type == 'both':
+            context.user_data['ask_next'] = 'city':
+            await daily_valute_set(update, context)
