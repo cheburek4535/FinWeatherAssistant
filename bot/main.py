@@ -121,14 +121,37 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         user_city = text
         if user_city in cities:
             user_data["daily_city"] = user_city
-            response = f"Отлично! Теперь вы будете получать погоду в городе: {user_city}"
+            user_data["waiting_for"] = None
+
+            if user_data['daily_type'] == 'both':
+                user_data['ask_next'] == 'valute'
+                await update.message.reply_text("Теперь напишите название валюты для рассылки (Тег или название):")
+                user_data['waiting_for'] = 'confirm_daily_valute'
+
+            else:
+                if user_data['daily_type'] == 'city':
+                    daily_type_for_message = "Погода"
+                elif user_data['daily_type'] == 'valute':
+                    daily_type_for_message = "<Курсы валют"
+                elif user_data['daily_type'] == 'both':
+                    daily_type_for_message = "Погода и валюта"
+                else:
+                    daily_type_for_message = None
+
+                await update.message.reply_text(f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"\n'
+                                                f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
+                                                f' (доступно только премиум пользователям)', reply_markup = get_main_keyboard())
 
         else:
-            response = "Город не найден. Попробуйте отправить вашу геолокацию"
+            await update.message.reply_text("Город не найден. Попробуйте отправить вашу геолокацию")
+
+
+        elif user_data['waiting_for'] == 'confirm_daily_valute':
 
 
 
-        await update.message.reply_text(response, reply_markup=get_main_keyboard())
+
+
 
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")

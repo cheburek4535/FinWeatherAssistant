@@ -99,5 +99,5 @@ async def button_handler(update: Update, context: CallbackContext):
         elif daily_type == 'currency':
             await daily_valute_set(update, context)
         elif daily_type == 'both':
-            context.user_data['ask_next'] = 'city':
+            context.user_data['ask_next'] = 'city'
             await daily_valute_set(update, context)
