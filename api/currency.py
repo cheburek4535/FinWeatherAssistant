@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from Logger.my_logger import logger
-
+import urllib.request
 
 
 
@@ -19,6 +19,8 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
             или None при ошибке.
         """
     url = "https://www.cbr-xml-daily.ru/daily_json.js"
+
+
 
     if base.lower() in ["rub", "рубль", "российский рубль", "рубли"]:
         return {
@@ -102,3 +104,11 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
 # print(get_currency_rates('бакс'))
 
 #print(get_currency_rates('AUD', get_all=True))
+
+# url = "https://www.cbr-xml-daily.ru/daily_json.js"
+# filename = "valute_list.json"
+# with urllib.request.urlopen(url) as response:
+#         content = response.read().decode("utf-8")
+# with open(filename, 'w', encoding='utf-8') as f:
+#         f.write(content)
+

@@ -40,13 +40,14 @@ def show_story(user_id):
 
 
 
-def save_daily_config(user_id: int, user_name: str, daily_type:str, city: str, valute: str, daily_schedule:str):
+def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str, city: str, valute: str, daily_schedule:str):
     session = Session()
 
     try:
         new_config = DailyConfig(
             user_id=user_id,
             user_name=user_name,
+            chat_id=chat_id,
             daily_type=daily_type,
             daily_city=city,
             daily_valute=valute,

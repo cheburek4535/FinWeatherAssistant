@@ -9,6 +9,7 @@ from api.timezone import get_local_time_by_city
 from bot.daily import button_handler, daily_handler
 import csv
 from pathlib import Path
+import json
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -125,28 +126,78 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
             if user_data['daily_type'] == 'both':
                 user_data['ask_next'] == 'valute'
-                await update.message.reply_text("Теперь напишите название валюты для рассылки (Тег или название):")
+                await context.bot.send_message(chat_id=update.effective_chat.id, text="Теперь напишите название валюты для рассылки (С помощью кнопок или в родительном падеже текстом):", reply_markup=get_currency_keyboard())
                 user_data['waiting_for'] = 'confirm_daily_valute'
 
             else:
-                if user_data['daily_type'] == 'city':
+                if user_data['daily_type'] == 'weather':
                     daily_type_for_message = "Погода"
-                elif user_data['daily_type'] == 'valute':
-                    daily_type_for_message = "<Курсы валют"
+                elif user_data['daily_type'] == 'currency':
+                    daily_type_for_message = "Курсы валют"
                 elif user_data['daily_type'] == 'both':
                     daily_type_for_message = "Погода и валюта"
                 else:
                     daily_type_for_message = None
 
+                save_daily_config(
+                    user_id=update.effective_user.id,
+                    user_name=update.effective_user.name,
+                    chat_id=update.effective_chat.id,
+                    daily_type=user_data['daily_type'],
+                    city=user_city,
+                    valute= 'NULL',
+                    daily_schedule=user_data['daily_schedule'],
+
+                )
+
                 await update.message.reply_text(f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"\n'
                                                 f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
                                                 f' (доступно только премиум пользователям)', reply_markup = get_main_keyboard())
+
 
         else:
             await update.message.reply_text("Город не найден. Попробуйте отправить вашу геолокацию")
 
 
-        elif user_data['waiting_for'] == 'confirm_daily_valute':
+    elif user_data['waiting_for'] == 'confirm_daily_valute':
+      user_data['daily_valute'] = text
+      user_data["waiting_for"] = None
+
+      if user_data['daily_type'] == 'city':
+          daily_type_for_message = "Погода"
+      elif user_data['daily_type'] == 'valute':
+          daily_type_for_message = "<Курсы валют"
+      elif user_data['daily_type'] == 'both':
+          daily_type_for_message = "Погода и валюта"
+      else:
+          daily_type_for_message = None
+      if user_data.get('daily_city') is not None and user_data.get('daily_city') != '':
+          city = user_data['daily_city']
+      else:
+          city = 'NULL'
+
+      save_daily_config(
+          user_id=update.effective_user.id,
+          user_name=update.effective_user.name,
+          chat_id=update.effective_chat.id,
+          daily_type=user_data['daily_type'],
+          city=city,
+          valute=text,
+          daily_schedule=user_data['daily_schedule'],
+
+      )
+
+      await update.message.reply_text(
+          f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
+          f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
+          f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
+
+
+
+
+
+
+
 
 
 

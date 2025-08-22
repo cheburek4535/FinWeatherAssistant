@@ -1,5 +1,7 @@
+from sqlalchemy.orm.sync import update
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
+from bot.keyboard import get_currency_keyboard
 
 
 
@@ -52,12 +54,18 @@ async def daily_timing_set(update: Update, context: CallbackContext):
 
 
 async def daily_city_set(update: Update, context: CallbackContext):
-    await update.callback_query.edit_message_text("Напишите название города для рассылки погоды:")
+    #await update.callback_query.edit_message_text("Напишите название города для рассылки погоды:", reply_markup=get_currency_keyboard())
+    await update.callback_query.answer()
     user_data = context.user_data
     user_data["waiting_for"] = 'confirm_daily_city'
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Напишите название города для рассылки погоды (или выберите из кнопок):",
+        reply_markup=get_currency_keyboard()
+    )
 
 async def daily_valute_set(update: Update, context: CallbackContext):
-    await update.callback_query.edit_message_text("Напишите название валюты для рассылки курса:")
+    await update.callback_query.edit_message_text("Напишите название валюты для рассылки курса (С помощью кнопок или в родительном падеже текстом):")
     user_data = context.user_data
     user_data["waiting_for"] = 'confirm_daily_valute'
 
@@ -101,3 +109,9 @@ async def button_handler(update: Update, context: CallbackContext):
         elif daily_type == 'both':
             context.user_data['ask_next'] = 'city'
             await daily_valute_set(update, context)
+
+
+
+
+
+

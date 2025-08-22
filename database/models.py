@@ -25,6 +25,7 @@ class DailyConfig(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, nullable=False)
     user_name = Column(String, nullable=False)
+    chat_id = Column(Integer, nullable=False)
     daily_type = Column(String(20), nullable=False)
     daily_city = Column(String(200), nullable=True)
     daily_valute = Column(String(100), nullable=True)
