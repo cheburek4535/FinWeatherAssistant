@@ -2,7 +2,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
-from database.crud import save_request, show_story, save_daily_config
+from database.crud import save_request, show_story, save_daily_config, get_daily_mode, save_daily_mode
 from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_inline_currency_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
@@ -163,7 +163,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                     f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
             user_data['daily_city'] = None
             user_data['daily_valute'] = None
-
+            user_data['daily_mode'] = 'ON'
+            save_daily_mode(user_name=update.effective_user.name, daily_mode=user_data['daily_mode'])
 
         else:
 
@@ -217,6 +218,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
             user_data['daily_valute'] = None
             user_data['daily_city'] = None
+            user_data['daily_mode'] = 'ON'
+            save_daily_mode(user_name=update.effective_user.name,daily_mode=user_data['daily_mode'])
 
 
 

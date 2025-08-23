@@ -1,4 +1,4 @@
-from database.crud import save_daily_config
+from database.crud import save_daily_config, delete_daily_config, save_daily_mode
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
 #from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard
@@ -6,10 +6,19 @@ from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQuery
 
 
 async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_data = context.user_data
     text = ('Вы можете включить ежедневную рассылку уведомления о погоде и курсах валют.\n'
                                     'Просто укажите время, валюту или город нажав кнопку ниже.\n'
                                     'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже')
-    inline_keyboard = [
+    if user_data['daily_mode'] == 'ON':
+        inline_keyboard = [
+            [InlineKeyboardButton("Добавить конфигурацию(Premium)", callback_data='add_daily'),
+             InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')],
+            [InlineKeyboardButton("Изменить рассылку", callback_data='change_daily'),
+             InlineKeyboardButton("Выключить рассылку", callback_data='off_daily')],
+        ]
+    else:
+        inline_keyboard = [
             [InlineKeyboardButton("Включить рассылку", callback_data='daily_on'),
              InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
         ]
@@ -117,6 +126,18 @@ async def button_handler(update: Update, context: CallbackContext):
         context.user_data['daily_valute'] = update.callback_query.data if update.callback_query.data else None
 
 
+    if data == 'off_daily':
+        try:
+            delete_daily_config(user_name=update.effective_user.name)
+            context.user_data['daily_mode'] = 'OFF'
+            save_daily_mode(user_name=update.effective_user.name, daily_mode=context.user_data['daily_mode'])
+            context.user_data['daily_type'] = None
+            context.user_data['daily_city'] = None
+            context.user_data['daily_schedule'] = None
+            context.user_data['daily_city'] = None
+            await update.callback_query.edit_message_text("Ваша конфигурация рассылки удалена, а рассылка отменена.\nВы можете настроить рассылку заново когда захотите!")
+        except Exception:
+            await update.callback_query.edit_message_text("Произошла ошибка. Попробуйте позже.")
 
 
 

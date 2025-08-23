@@ -1,6 +1,6 @@
+from pycparser.c_ast import Return
 
-
-from database.models import Session, UserRequest, DailyConfig
+from database.models import Session, UserRequest, DailyConfig, DailyMode
 from Logger.my_logger import logger
 
 def save_request(user_id: int, user_name: str, req_type: str, req_data: str, resp_data: str):
@@ -66,6 +66,61 @@ def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str
         session.close()
 
 
+def delete_daily_config(user_name: str):
+    session = Session()
+    try:
+        objs = session.query(DailyConfig).filter(DailyConfig.user_name == user_name).all()
+
+        if objs:
+            for obj in objs:
+                session.delete(obj)
+            session.commit()
+            print(f"Конфигурация юзера {user_name} успешно удалена")
+        else:
+            print(f"Конфигурация юзера {user_name} не найдена")
+
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Ошибка при удалении записи из БД: {e}")
+
+    finally:
+        session.close()
+
+
+def get_daily_mode(user_name: str):
+    session = Session()
+    try:
+        obj = session.query(DailyMode).filter(DailyMode.user_name == user_name).order_by(DailyMode.id.desc()).first()
+        if obj:
+            mode = obj.daily_mode
+            return mode
+        else:
+            print("Юзер не найден в БД")
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Ошибка получения режима рассылки: {e}")
+    finally:
+        session.close()
+
+
+
+def save_daily_mode(user_name: str, daily_mode: str):
+    session = Session()
+    try:
+        new_mode = DailyMode(
+            user_name=user_name,
+            daily_mode=daily_mode,
+        )
+        session.add(new_mode)
+        session.commit()
+        logger.info(f"Режим рассылки сохранена в БД: ID={new_mode.id}")
+
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Ошибка сохранения режима в БД: {e}")
+
+    finally:
+        session.close()
 
 #story_lines = show_story(6278046215)
 
@@ -74,3 +129,6 @@ def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str
 #print(show_story(6278046215))
 
 #save_daily_config(123456789, "TEST", "test_type", "Тесто город", "Тесто валюта", "test_schedule")
+
+#save_daily_mode('@chebureck999', 'OFF')
+#print(get_daily_mode('@chebureck999'))

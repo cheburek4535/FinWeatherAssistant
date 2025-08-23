@@ -33,6 +33,13 @@ class DailyConfig(Base):
     timestamp = Column(DateTime, default=datetime.now)
 
 
+class DailyMode(Base):
+    __tablename__ = 'daily_modes'
+    id = Column(Integer, primary_key=True)
+    user_name = Column(String, nullable=False)
+    daily_mode = Column(String(4), nullable=True)
+    timestamp = Column(DateTime, default=datetime.now)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "assistant.db")
 engine = create_engine(f'sqlite:///{DB_PATH}')

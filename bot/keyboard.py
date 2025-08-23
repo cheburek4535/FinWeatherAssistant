@@ -1,6 +1,6 @@
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-
+from database.crud import get_daily_mode
 
 def get_main_keyboard():
     return ReplyKeyboardMarkup([
@@ -15,6 +15,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
         reply_markup=get_main_keyboard()
     )
+    dm = get_daily_mode(update.effective_user.name)
+    if dm == 'ON':
+        context.user_data['daily_mode'] = 'ON'
+    elif dm == 'OFF':
+        context.user_data['daily_mode'] = 'OFF'
+    else:
+        context.user_data['daily_mode'] = 'OFF'
+    context.user_data['daily_valute'] = None
 
 def get_currency_keyboard():
     return ReplyKeyboardMarkup([
