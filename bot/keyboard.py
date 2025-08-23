@@ -23,6 +23,17 @@ def get_currency_keyboard():
         ['⬅️Назад']
     ], resize_keyboard=True)
 
+def get_inline_currency_keyboard():
+    keyboard = [
+        [InlineKeyboardButton('$ Доллар 💵', callback_data='доллар'),
+        InlineKeyboardButton('€ Евро 💶', callback_data='евро')],
+        [InlineKeyboardButton('¥ Юань 💴', callback_data='юань'),
+         InlineKeyboardButton('£ Фунт стерлингов 💷', callback_data='фунт стерлингов')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
+
+
 def get_location_keyboard():
     keyboard = [
         [KeyboardButton(text="Отправить мой город", request_location=True)],

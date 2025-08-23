@@ -1,7 +1,7 @@
-from sqlalchemy.orm.sync import update
+from database.crud import save_daily_config
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
-from bot.keyboard import get_currency_keyboard
+#from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard
 
 
 
@@ -55,19 +55,22 @@ async def daily_timing_set(update: Update, context: CallbackContext):
 
 async def daily_city_set(update: Update, context: CallbackContext):
     #await update.callback_query.edit_message_text("Напишите название города для рассылки погоды:", reply_markup=get_currency_keyboard())
-    await update.callback_query.answer()
+    query = update.callback_query
+    await query.answer()
     user_data = context.user_data
     user_data["waiting_for"] = 'confirm_daily_city'
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text="Напишите название города для рассылки погоды (или выберите из кнопок):",
-        reply_markup=get_currency_keyboard()
-    )
+
+    await query.edit_message_text("Напишите название города для рассылки погоды:")
 
 async def daily_valute_set(update: Update, context: CallbackContext):
-    await update.callback_query.edit_message_text("Напишите название валюты для рассылки курса (С помощью кнопок или в родительном падеже текстом):")
+
+
     user_data = context.user_data
     user_data["waiting_for"] = 'confirm_daily_valute'
+    await update.callback_query.edit_message_text(
+        "Напишите название валюты для рассылки курса:",
+        )
+    user_data['daily_valute'] = update.callback_query.data if update.callback_query.data else None
 
 async def button_handler(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -76,7 +79,7 @@ async def button_handler(update: Update, context: CallbackContext):
     if data in ('daily_on', 'back_to_daily_on'):
         await daily_on(update, context)
 
-    elif data in ('daily_is_weather', 'daily_is_currency', 'daily_is_both'):
+    if data in ('daily_is_weather', 'daily_is_currency', 'daily_is_both'):
         if data == 'daily_is_weather':
             context.user_data['daily_type'] = 'weather'
         elif data == 'daily_is_currency':
@@ -85,10 +88,10 @@ async def button_handler(update: Update, context: CallbackContext):
             context.user_data['daily_type'] = 'both'
         await daily_timing_set(update, context)
 
-    elif data == 'back_to_daily_handler':
+    if data == 'back_to_daily_handler':
         await daily_handler(update, context)
 
-    elif data in ('daily_in_morning', 'daily_in_afternoon', 'daily_in_evening', 'daily_in_morning_and_afternoon', 'daily_in_three', 'daily_in_afternoon_and_evening', 'daily_in_morning_and_evening'):
+    if data in ('daily_in_morning', 'daily_in_afternoon', 'daily_in_evening', 'daily_in_morning_and_afternoon', 'daily_in_three', 'daily_in_afternoon_and_evening', 'daily_in_morning_and_evening'):
         schedule_map = {
             'daily_in_morning': 'Mon',
             'daily_in_afternoon': 'Aft',
@@ -110,6 +113,8 @@ async def button_handler(update: Update, context: CallbackContext):
             context.user_data['ask_next'] = 'city'
             await daily_valute_set(update, context)
 
+    if data in ('доллар', 'евро', 'юань', 'фунт стерлингов'):
+        context.user_data['daily_valute'] = update.callback_query.data if update.callback_query.data else None
 
 
 
