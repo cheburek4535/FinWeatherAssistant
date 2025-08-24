@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
 
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
@@ -44,6 +44,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "assistant.db")
 engine = create_engine(f'sqlite:///{DB_PATH}')
 #engine = create_engine('sqlite:///assistant.db')
+
+class Users(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    user_id = Column(Integer, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
+    premium = Column(Boolean, nullable=False)
+
 
 Base.metadata.create_all(engine)
 

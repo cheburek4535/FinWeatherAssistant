@@ -1,7 +1,7 @@
 from cffi.model import char_array_type
 from pycparser.c_ast import Return
 
-from database.models import Session, UserRequest, DailyConfig, DailyMode
+from database.models import Session, UserRequest, DailyConfig, DailyMode, Users
 from Logger.my_logger import logger
 
 def save_request(user_id: int, user_name: str, req_type: str, req_data: str, resp_data: str):
@@ -117,7 +117,9 @@ def get_daily_mode(user_name: str):
 
             session.query(DailyMode).filter(DailyMode.user_name == user_name, DailyMode.id < last_id).delete(synchronize_session=False)
             session.commit()
+            print('Режимы юзеров успешно найдены в БД')
             return mode
+
         else:
             print("Юзер не найден в БД")
     except Exception as e:
@@ -146,6 +148,25 @@ def save_daily_mode(user_name: str, daily_mode: str):
     finally:
         session.close()
 
+def get_all_users_with_daily_mode():
+    session = Session()
+    try:
+        objs = session.query(DailyMode).all()
+        if objs:
+            users = [obj.user_name for obj in objs]
+
+            return users
+        else:
+            print("Юзер не найден в БД")
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Ошибка получения юзеров: {e}")
+    finally:
+        session.close()
+
+# def save_user_data(user_name: str, chat_id: int, data: str):
+#     session = Session()
+#     try:
 #story_lines = show_story(6278046215)
 
 #for line in story_lines:
@@ -155,6 +176,10 @@ def save_daily_mode(user_name: str, daily_mode: str):
 #save_daily_config(123456789, "TEST", "test_type", "Тесто город", "Тесто валюта", "test_schedule")
 
 #save_daily_mode('@chebureck999', 'OFF')
-#print(get_daily_mode('@chebureck999'))
 
-print(get_daily_config('@chebureck999', 'Evn'))
+
+#print(get_daily_config('@chebureck999', 'Evn'))
+res = (get_all_users_with_daily_mode())
+for obj in res:
+    print(obj)
+#print(get_daily_mode(res))

@@ -1,15 +1,19 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler, JobQueue
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request, show_story, save_daily_config, get_daily_mode, save_daily_mode
 from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_inline_currency_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
-from bot.daily import button_handler, daily_handler
+from bot.daily import button_handler, daily_handler, send_daily_job
 import csv
 from pathlib import Path
 import json
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -226,10 +230,28 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
 
 
+def init_scheduler(application):
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        send_daily_job,
+        trigger=CronTrigger(hour=9, minute=0),
+        args=[application, 'Mon']
+    )
 
+    scheduler.add_job(
+        send_daily_job,
+        trigger=CronTrigger(hour=13, minute=30),
+        args=[application, 'Aft']
+    )
 
+    scheduler.add_job(
+        send_daily_job,
+        trigger=CronTrigger(hour=22, minute=53),
+        args=[application, 'Evn']
+    )
 
-
+    scheduler.start()
+    return scheduler
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")
     #await update.message.reply_text(f"Вы прислали: {update.message.text}")
@@ -238,6 +260,7 @@ def main() -> None:
     application = ApplicationBuilder().token("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU").build()
     application.add_handler(CommandHandler("start", start))
 
+    scheduler = init_scheduler(application)
 
     application.add_handler(MessageHandler(filters.Regex("^🌤️ Получить погоду$"), weather_handler))
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
@@ -247,7 +270,11 @@ def main() -> None:
     #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))
-    application.run_polling()
+
+
+
+    application.run_polling(stop_signals=None)
+    scheduler.shutdown()
 
 
 

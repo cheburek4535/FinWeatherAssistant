@@ -1,4 +1,4 @@
-from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config
+from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
 #from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard
@@ -142,56 +142,59 @@ async def button_handler(update: Update, context: CallbackContext):
             await update.callback_query.edit_message_text("Произошла ошибка. Попробуйте позже.")
 
 
-
-def send_daily(update: Update, context: CallbackContext):
-    mode = get_daily_mode(update.effective_user.name)
-    if mode == 'ON':
-         if datetime.now().strftime("%H:%M") == '09:00':
-            time = 'Mon'
-         elif datetime.now().strftime("%H:%M") == '13:30':
-             time = 'Aft'
-         elif datetime.now().strftime("%H:%M") == '18:00':
-             time = 'Evn'
-         else:
-             time = None
-
-         config = get_daily_config(user_name=update.effective_user.name, time=time)
-         if config[0] == 'currency' or config[0] == 'both':
-
-             currency_data = get_currency_rates(config[3])
-
-             if currency_data:
-                 response = (
-                     f"💱Курс валюты: {currency_data['name']}:\n"
-                     f"🕒Время: {currency_data['timestamp'][11:16]}\n"
-                     f"💰Текущий курс: {currency_data['rate']:.2f}₽\n"
-                     f"⏳Предыдущий курс: {currency_data['previous']:.2f}₽\n"
-                     f"📈Изменение на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)"
-                 )
-
-             else:
-                 response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!"
-
-             context.bot.send_message(config[1], response)
+def send_daily_job(application, time):
+    import asyncio
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(_async_send_daily(application, time))
+    except Exception:
+        print("Ошибка создания апликации")
+    finally:
+        loop.close()
 
 
-         if config[0] == 'weather' or config[0] == 'both':
+async def _async_send_daily(application, time):
+    users = get_all_users_with_daily_mode()
 
-             weather_data = get_weather(config[2], weather_api_key)
-             if weather_data:
-                 response = (
-                     f"🌆Погода в городе {weather_data['city']}:\n"
-                     f"🌡️Температура: {weather_data['temp']}°C\n"
-                     f"🤗Ощущается как: {weather_data['feels_like']}°C\n"
-                     f"🌥️Общее состояние: {weather_data['description']}\n"
-                     f"💧Влажность: {weather_data['humidity']}\n"
-                     f"🕒Местное время: {get_local_time_by_city(config[2])}"
-                 )
+    for user in users:
+        if get_daily_mode(user) == 'ON':
 
-             else:
-                 response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
+             config = get_daily_config(user_name=user, time=time)
+             if config[0] in ['currency', 'both']:
 
-             context.bot.send_message(config[1], response)
+                 currency_data = get_currency_rates(config[3])
 
-if datetime.now().strftime("%H:%M") == '17:51':
-    send_daily(update, context)
+                 if currency_data:
+                     response = (
+                         f"💱Курс валюты: {currency_data['name']}:\n"
+                         f"🕒Время: {currency_data['timestamp'][11:16]}\n"
+                         f"💰Текущий курс: {currency_data['rate']:.2f}₽\n"
+                         f"⏳Предыдущий курс: {currency_data['previous']:.2f}₽\n"
+                         f"📈Изменение на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)"
+                     )
+
+                 else:
+                     response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!"
+
+                 await application.bot.send_message(config[1], response)
+
+
+             if config[0] in ['weather','both']:
+
+                 weather_data = get_weather(config[2], weather_api_key)
+                 if weather_data:
+                     response = (
+                         f"🌆Погода в городе {weather_data['city']}:\n"
+                         f"🌡️Температура: {weather_data['temp']}°C\n"
+                         f"🤗Ощущается как: {weather_data['feels_like']}°C\n"
+                         f"🌥️Общее состояние: {weather_data['description']}\n"
+                         f"💧Влажность: {weather_data['humidity']}\n"
+                         f"🕒Местное время: {get_local_time_by_city(config[2])}"
+                     )
+
+                 else:
+                     response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
+
+                 await application.bot.send_message(config[1], response)
+
