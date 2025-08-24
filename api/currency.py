@@ -102,6 +102,15 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
 # print(get_currency_rates('Евро'))
 # print(get_currency_rates('EUR'))
 # print(get_currency_rates('бакс'))
+# print(get_currency_rates('юань'))
+# print(get_currency_rates('лир'))
+# print(get_currency_rates('доллар'))
+# print(get_currency_rates('Евро'))
+# print(get_currency_rates('EUR'))
+# print(get_currency_rates('бакс'))
+# print(get_currency_rates('юань'))
+# print(get_currency_rates('лир'))
+# print(get_currency_rates('доллар'))
 
 #print(get_currency_rates('AUD', get_all=True))
 

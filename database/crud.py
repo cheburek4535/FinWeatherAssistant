@@ -1,3 +1,4 @@
+from cffi.model import char_array_type
 from pycparser.c_ast import Return
 
 from database.models import Session, UserRequest, DailyConfig, DailyMode
@@ -66,6 +67,25 @@ def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str
         session.close()
 
 
+def get_daily_config(user_name: str, time: str):
+   session = Session()
+   try:
+       config = session.query(DailyConfig).filter(DailyConfig.user_name == user_name, DailyConfig.daily_schedule.contains(time)).order_by(DailyConfig.id.desc()).first()
+       dtype = config.daily_type
+       chat_id = config.chat_id
+       city = config.daily_city
+       valute = config.daily_valute
+
+
+       return dtype, chat_id, city, valute
+   except Exception as e:
+       session.rollback()
+       logger.error(f"Ошибка получения конфига: {e}")
+   finally:
+       session.close()
+
+
+
 def delete_daily_config(user_name: str):
     session = Session()
     try:
@@ -93,6 +113,10 @@ def get_daily_mode(user_name: str):
         obj = session.query(DailyMode).filter(DailyMode.user_name == user_name).order_by(DailyMode.id.desc()).first()
         if obj:
             mode = obj.daily_mode
+            last_id = obj.id
+
+            session.query(DailyMode).filter(DailyMode.user_name == user_name, DailyMode.id < last_id).delete(synchronize_session=False)
+            session.commit()
             return mode
         else:
             print("Юзер не найден в БД")
@@ -132,3 +156,5 @@ def save_daily_mode(user_name: str, daily_mode: str):
 
 #save_daily_mode('@chebureck999', 'OFF')
 #print(get_daily_mode('@chebureck999'))
+
+print(get_daily_config('@chebureck999', 'Evn'))

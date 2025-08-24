@@ -38,8 +38,26 @@ def get_weather(city: str, api_key: str) -> dict:
         logger.error(f"Ошибка запроса погоды: {e}")
         return None
 
-#print(get_weather("Сочи", weather_api_key))
-
+# print(get_weather("Сочи", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Санкт-Петербург", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Сочи", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Санкт-Петербург", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
+# print(get_weather("Москва", weather_api_key))
 
 
 
