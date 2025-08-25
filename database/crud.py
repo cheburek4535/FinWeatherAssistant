@@ -67,10 +67,11 @@ def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str
         session.close()
 
 
-def get_daily_config(user_name: str, time: str):
+def get_daily_config(user_id: str, time: str):
    session = Session()
    try:
-       config = session.query(DailyConfig).filter(DailyConfig.user_name == user_name, DailyConfig.daily_schedule.contains(time)).order_by(DailyConfig.id.desc()).first()
+       config = session.query(DailyConfig).filter(DailyConfig.user_id == user_id, DailyConfig.daily_schedule.contains(time)).order_by(DailyConfig.id.desc()).first()
+
        dtype = config.daily_type
        chat_id = config.chat_id
        city = config.daily_city
@@ -153,7 +154,7 @@ def get_all_users_with_daily_mode():
     try:
         objs = session.query(DailyMode).all()
         if objs:
-            users = [obj.user_name for obj in objs]
+            users = [obj.user_id for obj in objs]
 
             return users
         else:
@@ -179,7 +180,5 @@ def get_all_users_with_daily_mode():
 
 
 #print(get_daily_config('@chebureck999', 'Evn'))
-res = (get_all_users_with_daily_mode())
-for obj in res:
-    print(obj)
+
 #print(get_daily_mode(res))

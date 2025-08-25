@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
 from database.crud import save_request, show_story, save_daily_config, get_daily_mode, save_daily_mode
-from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_inline_currency_keyboard
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_inline_currency_keyboard, get_help_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
 from bot.daily import button_handler, daily_handler, send_daily_job
@@ -45,6 +45,18 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user_data = context.user_data
     get_main_keyboard()
     user_data['waiting_for'] = None
+
+async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    #await update.message.reply_text('Инструкция по взаимодействию с ботом:\n1.Кнопки "Получить погоду" и "Курс валют" позволяют узнать погоду по городу который вы введете или отправите геолокацию и получить курс валют по названию')
+    await update.message.reply_text("Ниже приведены кнопки для получения инструкции по взаимодейтсвию с ботом\nА также список всех валют, курсы которых которые можно можно запросить у бота.\n"
+                                    "Если у вас возникли другие вопросы, вы можете связаться напрямую с разработчиком через кнопку 'Баг-репорт.'", reply_markup=get_help_keyboard())
+
+
+async def premium_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("Эта функция пока недоступна, ожидайте в ближайшем обновлении.")
+async def bug_report_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("Пожалуйста, опишите обнаруженный вами баг или ошибку.\nСообщение отправится разработчику, и проект станет лучше✨.\nБудем благодарны за подробное описание!")
+    context.user_data['waiting_for'] = 'bug_report'
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
     user_data = context.user_data
@@ -128,7 +140,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
                 cities.add(city_name)
 
-        user_city = text[0].upper() + text[1:].lower()
+        user_city = text[0].upper() + text[1:]
 
         if user_city in cities:
             user_data["daily_city"] = user_city
@@ -225,6 +237,13 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             user_data['daily_mode'] = 'ON'
             save_daily_mode(user_name=update.effective_user.name,daily_mode=user_data['daily_mode'])
 
+    elif user_data['waiting_for'] == 'bug_report':
+        user_name = update.effective_user.name
+        await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый разработчик!\nВам репорт от юзера {user_name}:\n{text}")
+        await update.message.reply_text("Репорт отправлен! Спасибо за участие в развитии проекта!")
+        user_data['waiting_for'] = None
+
+
 
 
 
@@ -246,7 +265,7 @@ def init_scheduler(application):
 
     scheduler.add_job(
         send_daily_job,
-        trigger=CronTrigger(hour=22, minute=53),
+        trigger=CronTrigger(hour=18, minute=0),
         args=[application, 'Evn']
     )
 
@@ -255,6 +274,7 @@ def init_scheduler(application):
 #async def debug_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #print(f"Получено сообщение: {update.message.text}")
     #await update.message.reply_text(f"Вы прислали: {update.message.text}")
+
 
 def main() -> None:
     application = ApplicationBuilder().token("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU").build()
@@ -266,8 +286,11 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^💵 Курс валют$"), currency_handler))
     application.add_handler(MessageHandler(filters.Regex("^📔 История запросов$"), story_handler))
     application.add_handler(MessageHandler(filters.Regex("^📬 Рассылка$"), daily_handler))
+    application.add_handler(MessageHandler(filters.Regex("^📖 Дополнительно$"), help_handler))
+    application.add_handler(MessageHandler(filters.Regex("^🎖️ Premium$"), premium_handler))
+    application.add_handler(MessageHandler(filters.Regex("^👾 Баг-репорт$"), bug_report_handler))
     application.add_handler(CallbackQueryHandler(button_handler))
-    #application.add_handler(MessageHandler(filters.Regex("^⬅️Назад"), back_handler))
+
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))
 

@@ -1,11 +1,14 @@
+from bot.keyboard import get_main_keyboard
 from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
-#from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard
+from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard, get_help_keyboard
 from datetime import datetime
 from api.currency import get_currency_rates
 from api.weather_api import get_weather, weather_api_key
 from api.timezone import get_local_time_by_city
+#from bot.main import help_handler
+import json
 
 async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
@@ -14,10 +17,11 @@ async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                                     'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже')
     if user_data['daily_mode'] == 'ON':
         inline_keyboard = [
-            [InlineKeyboardButton("Добавить конфигурацию(Premium)", callback_data='add_daily'),
+            [InlineKeyboardButton("Добавить конфиг(Premium)", callback_data='add_daily'),
              InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')],
             [InlineKeyboardButton("Изменить рассылку", callback_data='change_daily'),
              InlineKeyboardButton("Выключить рассылку", callback_data='off_daily')],
+            [InlineKeyboardButton("Моя конфигурация рассылки", callback_data='show_config'),]
         ]
     else:
         inline_keyboard = [
@@ -39,7 +43,7 @@ async def daily_on(update: Update, context: CallbackContext):
         [InlineKeyboardButton("О погоде", callback_data='daily_is_weather'),
          InlineKeyboardButton("О валюте", callback_data='daily_is_currency')],
         [InlineKeyboardButton("О погоде и валюте", callback_data='daily_is_both')],
-        [InlineKeyboardButton("Назад", callback_data='back_to_daily_handler')],
+        [InlineKeyboardButton("⬅️Назад", callback_data='back_to_daily_handler')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="Давайте настроим рассылку для вас:\nО чем вы хотите получать уведомления?", reply_markup=reply_markup)
@@ -57,7 +61,7 @@ async def daily_timing_set(update: Update, context: CallbackContext):
          InlineKeyboardButton("Утром и вечером", callback_data='daily_in_morning_and_evening'),
          InlineKeyboardButton("Днём и вечером", callback_data='daily_in_afternoon_and_evening')],
         [InlineKeyboardButton("Утром Днём и вечером", callback_data='daily_in_three')],
-        [InlineKeyboardButton("Назад", callback_data='back_to_daily_on')],
+        [InlineKeyboardButton("⬅️Назад", callback_data='back_to_daily_on')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(text="В какое время вы хотели бы получать рассылку?", reply_markup=reply_markup)
@@ -141,6 +145,79 @@ async def button_handler(update: Update, context: CallbackContext):
         except Exception:
             await update.callback_query.edit_message_text("Произошла ошибка. Попробуйте позже.")
 
+    if data == 'change_daily':
+        try:
+            delete_daily_config(user_name=update.effective_user.name)
+            context.user_data['daily_mode'] = 'OFF'
+            save_daily_mode(user_name=update.effective_user.name, daily_mode=context.user_data['daily_mode'])
+            context.user_data['daily_type'] = None
+            context.user_data['daily_city'] = None
+            context.user_data['daily_schedule'] = None
+            context.user_data['daily_city'] = None
+            await daily_on(update, context)
+        except Exception:
+            await update.callback_query.edit_message_text("Произошла ошибка. Попробуйте позже.")
+
+    if data == 'daily_show_more_about':
+        keyboard = [
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_on'),]
+        ]
+        await update.callback_query.edit_message_text("Вы можете настроить для себя конфигурацию для ежедневной рассылки.\n"
+                                                      "Просто укажите время (утро = 9:00, день = 13:30, вечер = 18:00),\n"
+                                                      "тип рассылки, город, валюту (в зависимости от типа рассылки),\n"
+                                                      "и каждый день бот будет отправлять вам сообщение с вашей рассылкой.\n"
+                                                      "При оформлении премиума(пока недоступен) вы сможете добавлять несколько конфигураций рассылки,\n"
+                                                      "а также самостоятельно указывать нужное вам время", reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+    if data == 'give_all_valutes':
+        currencies = [
+            "Австралийский доллар", "Азербайджанский манат", "Алжирских динаров",
+            "Фунт стерлингов", "Армянских драмов", "Бахрейнский динар",
+            "Белорусский рубль", "Болгарский лев", "Боливиано",
+            "Бразильский реал", "Форинтов", "Донгов",
+            "Гонконгский доллар", "Лари", "Датская крона",
+            "Дирхам ОАЭ", "Доллар США", "Евро",
+            "Египетских фунтов", "Индийских рупий", "Рупий",
+            "Иранских риалов", "Тенге", "Канадский доллар",
+            "Катарский риал", "Сомов", "Юань",
+            "Кубинских песо", "Молдавских леев", "Тугриков",
+            "Найр", "Новозеландский доллар", "Норвежских крон",
+            "Оманский риал", "Злотый", "Саудовский риял",
+            "Румынский лей", "СДР (специальные права заимствования)", "Сингапурский доллар",
+            "Сомони", "Батов", "Так",
+            "Турецких лир", "Новый туркменский манат", "Узбекских сумов",
+            "Гривен", "Чешских крон", "Шведских крон",
+            "Швейцарский франк", "Эфиопских быров", "Сербских динаров",
+            "Рэндов", "Вон", "Иен",
+            "Кьятов"
+        ]
+        kb = [
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_help_handler'), ]
+        ]
+        await query.edit_message_text(
+            "Вот список всех поддерживаемых валют:\n\n" +
+            "\n".join([f"• {currency}" for currency in currencies]) +
+            "\n\nИменно такими названиями рекомендуется указывать валюту для получения курсов.\n"
+            "Обратите внимание что бот нечувствителен к регистру, и можно вводить, например так 'дОллАр', а также указывать популярную валюту через кнопки.",
+            reply_markup=InlineKeyboardMarkup(kb)
+        )
+
+    if data == 'back_to_help_handler':
+        # await help_handler(update, context)
+        await query.edit_message_text(
+            "Ниже приведены кнопки для получения инструкции по взаимодейтсвию с ботом\nА также список всех валют, курсы которых которые можно можно запросить у бота.\n"
+            "Если у вас возникли другие вопросы, вы можете связаться напрямую с разработчиком через кнопку 'Баг-репорт.'",
+            reply_markup=get_help_keyboard())
+
+    if data == 'give_instruction':
+        kb = [
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_help_handler'), ]
+        ]
+        await query.edit_message_text("Эта функция пока не готова, ожидайте в ближайшем обновлении.",
+                                      reply_markup=InlineKeyboardMarkup(kb))
+
+
 
 def send_daily_job(application, time):
     import asyncio
@@ -149,7 +226,7 @@ def send_daily_job(application, time):
     try:
         loop.run_until_complete(_async_send_daily(application, time))
     except Exception:
-        print("Ошибка создания апликации")
+        print("Ошибка создания аппликации")
     finally:
         loop.close()
 
@@ -160,7 +237,7 @@ async def _async_send_daily(application, time):
     for user in users:
         if get_daily_mode(user) == 'ON':
 
-             config = get_daily_config(user_name=user, time=time)
+             config = get_daily_config(user_id=user, time=time)
              if config[0] in ['currency', 'both']:
 
                  currency_data = get_currency_rates(config[3])

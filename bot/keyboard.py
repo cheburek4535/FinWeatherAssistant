@@ -6,7 +6,8 @@ def get_main_keyboard():
     return ReplyKeyboardMarkup([
         ["🌤️ Получить погоду", "💵 Курс валют"],
         ["📔 История запросов", "📬 Рассылка"],
-        ["📖Дополнительно"]
+        ["📖 Дополнительно", "🎖️ Premium"],
+        ["👾 Баг-репорт"]
     ], resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -61,3 +62,10 @@ def get_add_keyboard():
     ], resize_keyboard=True)
 
 
+def get_help_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("Инструкция по боту", callback_data='give_instruction'),
+         InlineKeyboardButton("Список всех валют", callback_data='give_all_valutes'),]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    return reply_markup
