@@ -1,5 +1,5 @@
 from bot.keyboard import get_main_keyboard
-from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode
+from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode, get_daily_config_without_time
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
 from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
 from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard, get_help_keyboard
@@ -25,8 +25,8 @@ async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         ]
     else:
         inline_keyboard = [
-            [InlineKeyboardButton("Включить рассылку", callback_data='daily_on'),
-             InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
+            [InlineKeyboardButton("Включить рассылку", callback_data='daily_on')],
+             [InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
         ]
     reply_markup = InlineKeyboardMarkup(inline_keyboard)
     if update.message:
@@ -160,7 +160,7 @@ async def button_handler(update: Update, context: CallbackContext):
 
     if data == 'daily_show_more_about':
         keyboard = [
-            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_on'),]
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_handler'),]
         ]
         await update.callback_query.edit_message_text("Вы можете настроить для себя конфигурацию для ежедневной рассылки.\n"
                                                       "Просто укажите время (утро = 9:00, день = 13:30, вечер = 18:00),\n"
@@ -192,9 +192,10 @@ async def button_handler(update: Update, context: CallbackContext):
             "Рэндов", "Вон", "Иен",
             "Кьятов"
         ]
+
         kb = [
-            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_help_handler'), ]
-        ]
+                [InlineKeyboardButton('⬅️Назад', callback_data='back_to_help_handler'), ]
+            ]
         await query.edit_message_text(
             "Вот список всех поддерживаемых валют:\n\n" +
             "\n".join([f"• {currency}" for currency in currencies]) +
@@ -216,6 +217,43 @@ async def button_handler(update: Update, context: CallbackContext):
         ]
         await query.edit_message_text("Эта функция пока не готова, ожидайте в ближайшем обновлении.",
                                       reply_markup=InlineKeyboardMarkup(kb))
+
+
+    if data == 'show_config':
+        kb = [
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_on')]
+        ]
+        config = get_daily_config_without_time(update.effective_user.id)
+        schedule_map = {
+            'Mon': "утром",
+            'Aft': "днём",
+            'Evn': "вечером",
+            'MonAft': "утром и днём",
+            'MonEvn': "утром и вечером",
+            'AftEvn': "днём и вечером",
+            'MonAftEvn': "утром, днём и вечером",
+        }
+        time = schedule_map.get(config[4], '')
+
+        type_map = {
+            'both' : 'о погоде и курсах валют',
+            'weather': 'о погоде',
+            'currency': 'о курсах валют'
+        }
+        dtype = type_map.get(config[0], '')
+
+        if config[2] is not None:
+            city = f", Город - {config[2]}"
+        else:
+            city = ''
+        if config[3] is not None:
+            valute = f", Валюта - {config[3]}"
+        else:
+            valute = ''
+
+        await query.edit_message_text(f"Конфигурация вашей рассылки:\nРассылка {time} {dtype}{city}{valute}", reply_markup=InlineKeyboardMarkup(kb))
+
+
 
 
 

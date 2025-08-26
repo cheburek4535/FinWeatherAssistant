@@ -85,7 +85,24 @@ def get_daily_config(user_id: str, time: str):
    finally:
        session.close()
 
+def get_daily_config_without_time(user_id: int):
+    session = Session()
+    try:
+        config = session.query(DailyConfig).filter(DailyConfig.user_id == user_id).order_by(
+            DailyConfig.id.desc()).first()
 
+        dtype = config.daily_type
+        chat_id = config.chat_id
+        city = config.daily_city
+        valute = config.daily_valute
+        time = config.daily_schedule
+
+        return dtype, chat_id, city, valute, time
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Ошибка получения конфига: {e}")
+    finally:
+        session.close()
 
 def delete_daily_config(user_name: str):
     session = Session()
@@ -179,6 +196,6 @@ def get_all_users_with_daily_mode():
 #save_daily_mode('@chebureck999', 'OFF')
 
 
-#print(get_daily_config('@chebureck999', 'Evn'))
+#print(get_daily_config_without_time('6278046215'))
 
 #print(get_daily_mode(res))

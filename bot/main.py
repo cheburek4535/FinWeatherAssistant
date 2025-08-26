@@ -118,13 +118,19 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 req_data=str(text),
                 resp_data=response
             )
+
         else:
-            response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!"
+
+
+            response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!\nПравильные названия валют для запроса есть во вкладке Дополнительно->Список всех валют."
 
         if text == "⬅️Назад":
             response = "Возвращено назад"
+
         await update.message.reply_text(response, reply_markup=get_main_keyboard())
         user_data['waiting_for'] = None
+
+
 
 
     elif user_data.get("waiting_for") == "confirm_daily_city":

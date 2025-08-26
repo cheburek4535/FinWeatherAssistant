@@ -64,8 +64,8 @@ def get_add_keyboard():
 
 def get_help_keyboard():
     keyboard = [
-        [InlineKeyboardButton("Инструкция по боту", callback_data='give_instruction'),
-         InlineKeyboardButton("Список всех валют", callback_data='give_all_valutes'),]
+        [InlineKeyboardButton("Инструкция по боту", callback_data='give_instruction')],
+         [InlineKeyboardButton("Список всех валют", callback_data='give_all_valutes'),]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
