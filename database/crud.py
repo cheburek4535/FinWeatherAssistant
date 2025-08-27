@@ -148,11 +148,12 @@ def get_daily_mode(user_name: str):
 
 
 
-def save_daily_mode(user_name: str, daily_mode: str):
+def save_daily_mode(user_name: str, user_id: int, daily_mode: str):
     session = Session()
     try:
         new_mode = DailyMode(
             user_name=user_name,
+            user_id=user_id,
             daily_mode=daily_mode,
         )
         session.add(new_mode)

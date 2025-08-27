@@ -136,7 +136,7 @@ async def button_handler(update: Update, context: CallbackContext):
         try:
             delete_daily_config(user_name=update.effective_user.name)
             context.user_data['daily_mode'] = 'OFF'
-            save_daily_mode(user_name=update.effective_user.name, daily_mode=context.user_data['daily_mode'])
+            save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=context.user_data['daily_mode'])
             context.user_data['daily_type'] = None
             context.user_data['daily_city'] = None
             context.user_data['daily_schedule'] = None
@@ -149,7 +149,7 @@ async def button_handler(update: Update, context: CallbackContext):
         try:
             delete_daily_config(user_name=update.effective_user.name)
             context.user_data['daily_mode'] = 'OFF'
-            save_daily_mode(user_name=update.effective_user.name, daily_mode=context.user_data['daily_mode'])
+            save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=context.user_data['daily_mode'])
             context.user_data['daily_type'] = None
             context.user_data['daily_city'] = None
             context.user_data['daily_schedule'] = None

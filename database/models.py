@@ -37,6 +37,8 @@ class DailyMode(Base):
     __tablename__ = 'daily_modes'
     id = Column(Integer, primary_key=True)
     user_name = Column(String, nullable=False)
+    user_id = Column(Integer, nullable=False)
+
     daily_mode = Column(String(4), nullable=True)
     timestamp = Column(DateTime, default=datetime.now)
 

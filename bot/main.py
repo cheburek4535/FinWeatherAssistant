@@ -186,7 +186,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             user_data['daily_city'] = None
             user_data['daily_valute'] = None
             user_data['daily_mode'] = 'ON'
-            save_daily_mode(user_name=update.effective_user.name, daily_mode=user_data['daily_mode'])
+            save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
 
         else:
 
@@ -241,7 +241,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             user_data['daily_valute'] = None
             user_data['daily_city'] = None
             user_data['daily_mode'] = 'ON'
-            save_daily_mode(user_name=update.effective_user.name,daily_mode=user_data['daily_mode'])
+            save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
 
     elif user_data['waiting_for'] == 'bug_report':
         user_name = update.effective_user.name
@@ -285,6 +285,7 @@ def init_scheduler(application):
 def main() -> None:
     application = ApplicationBuilder().token("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU").build()
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_handler))
 
     scheduler = init_scheduler(application)
 
