@@ -15,7 +15,7 @@ async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     text = ('Вы можете включить ежедневную рассылку уведомления о погоде и курсах валют.\n'
                                     'Просто укажите время, валюту или город нажав кнопку ниже.\n'
                                     'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже')
-    if user_data['daily_mode'] == 'ON':
+    if get_daily_mode(update.effective_user.id) == 'ON':
         inline_keyboard = [
             [InlineKeyboardButton("Добавить конфиг(Premium)", callback_data='add_daily'),
              InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')],
@@ -281,6 +281,7 @@ async def _async_send_daily(application, time):
                  currency_data = get_currency_rates(config[3])
 
                  if currency_data:
+
                      response = (
                          f"💱Курс валюты: {currency_data['name']}:\n"
                          f"🕒Время: {currency_data['timestamp'][11:16]}\n"

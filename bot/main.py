@@ -13,7 +13,7 @@ import json
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-
+import asyncio
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -55,7 +55,11 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def premium_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Эта функция пока недоступна, ожидайте в ближайшем обновлении.")
 async def bug_report_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Пожалуйста, опишите обнаруженный вами баг или ошибку.\nСообщение отправится разработчику, и проект станет лучше✨.\nБудем благодарны за подробное описание!")
+    if update.effective_user.id != 5449932947:
+        await update.message.reply_text("Пожалуйста, опишите обнаруженный вами баг или ошибку.\nСообщение отправится разработчику, и проект станет лучше✨.\nБудем благодарны за подробное описание!")
+    else:
+        await update.message.reply_text(
+            "Тима, ты заебал иди нахуй членосос, ладно без негатива, удиви меня кинь какую нибудь хуйню типа это баг репорт")
     context.user_data['waiting_for'] = 'bug_report'
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
@@ -246,7 +250,10 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     elif user_data['waiting_for'] == 'bug_report':
         user_name = update.effective_user.name
         await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый разработчик!\nВам репорт от юзера {user_name}:\n{text}")
-        await update.message.reply_text("Репорт отправлен! Спасибо за участие в развитии проекта!")
+        if update.effective_user.id != 5449932947:
+            await update.message.reply_text("Репорт отправлен! Спасибо за участие в развитии проекта!")
+        else:
+            await update.message.reply_text("Нет иди нахуй.")
         user_data['waiting_for'] = None
 
 
@@ -281,6 +288,10 @@ def init_scheduler(application):
     #print(f"Получено сообщение: {update.message.text}")
     #await update.message.reply_text(f"Вы прислали: {update.message.text}")
 
+async def keep_alive(context: CallbackContext):
+    # Простое действие, например, логирование или отправка ping
+    print("Keep-alive action to prevent sleep")
+
 
 def main() -> None:
     application = ApplicationBuilder().token("8358394327:AAH6aKjwnjL16fcWyA4P4M7Bp8CyMRdAuGU").build()
@@ -301,12 +312,17 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
     application.add_handler(MessageHandler(filters.LOCATION, handle_location))
 
+    application.job_queue.run_repeating(keep_alive, interval=600, first=10)
+    while True:
+        try:
+            application.run_polling(stop_signals=None)
+            scheduler.shutdown()
+        except Exception as e:
+            print(f"Error: {e}. Reconnecting in 10 seconds...")
+            asyncio.sleep(10)
 
-
-    application.run_polling(stop_signals=None)
-    scheduler.shutdown()
 
 
 
 if __name__ == '__main__':
-    main()
+     main()

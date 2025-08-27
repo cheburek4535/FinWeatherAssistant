@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from Logger.my_logger import logger
 import urllib.request
 
@@ -54,7 +54,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
                             ",frc", "долларов", "баксов", "доллара", "бакса", "курс доллара"]:
             dollar_currency = valutes['USD']
             return {
-                'timestamp': datetime.now().isoformat(),
+                'timestamp': (datetime.now() + timedelta(hours=3)).isoformat(),
                 'base': 'USD',
                 'rate': dollar_currency['Value'],
                 'previous': dollar_currency['Previous'],
@@ -65,7 +65,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
             currency_data = valutes[base.upper()]
 
             return {
-                'timestamp': datetime.now().isoformat(),
+                'timestamp': (datetime.now() + timedelta(hours=3)).isoformat(),
                 'base': base.upper(),
                 'rate': currency_data['Value'] / currency_data['Nominal'],
                 'previous': currency_data['Previous'] / currency_data['Nominal'],
@@ -82,7 +82,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
         if len(candidates) == 1:
             currency_data = valutes.get(candidates[0][0])
             return {
-                'timestamp': datetime.now().isoformat(),
+                'timestamp': (datetime.now() + timedelta(hours=3)).isoformat(),
                 'base': candidates[0][0],
                 'rate': currency_data['Value'] / currency_data['Nominal'],
                 'previous': currency_data['Previous'] / currency_data['Nominal'],
@@ -99,7 +99,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
         logger.error(f"Ошибка запроса курсов валют: {e}")
         return None
 
-# print(get_currency_rates('Евро'))
+#print(get_currency_rates('Евро'))
 # print(get_currency_rates('EUR'))
 # print(get_currency_rates('бакс'))
 # print(get_currency_rates('юань'))

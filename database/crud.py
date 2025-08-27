@@ -125,15 +125,15 @@ def delete_daily_config(user_name: str):
         session.close()
 
 
-def get_daily_mode(user_name: str):
+def get_daily_mode(user_id: int):
     session = Session()
     try:
-        obj = session.query(DailyMode).filter(DailyMode.user_name == user_name).order_by(DailyMode.id.desc()).first()
+        obj = session.query(DailyMode).filter(DailyMode.user_id == user_id).order_by(DailyMode.id.desc()).first()
         if obj:
             mode = obj.daily_mode
             last_id = obj.id
 
-            session.query(DailyMode).filter(DailyMode.user_name == user_name, DailyMode.id < last_id).delete(synchronize_session=False)
+            session.query(DailyMode).filter(DailyMode.user_id == user_id, DailyMode.id < last_id).delete(synchronize_session=False)
             session.commit()
             print('Режимы юзеров успешно найдены в БД')
             return mode
