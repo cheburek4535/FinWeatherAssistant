@@ -200,56 +200,81 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     elif user_data['waiting_for'] == 'confirm_daily_valute':
 
+        currencies = [
+            "австралийский доллар", "азербайджанский манат", "алжирских динаров",
+            "фунт стерлингов", "армянских драмов", "бахрейнский динар",
+            "белорусский рубль", "болгарский лев", "боливиано",
+            "бразильский реал", "форинтов", "донгов",
+            "гонконгский доллар", "лари", "датская крона",
+            "дирхам оаэ", "доллар сша", "евро",
+            "египетских фунтов", "индийских рупий", "рупий",
+            "иранских риалов", "тенге", "канадский доллар",
+            "катарский риал", "сомов", "юань",
+            "кубинских песо", "молдавских леев", "тугриков",
+            "найр", "новозеландский доллар", "норвежских крон",
+            "оманский риал", "злотый", "саудовский риял",
+            "румынский лей", "сдр (специальные права заимствования)", "сингапурский доллар",
+            "сомони", "батов", "так",
+            "турецких лир", "новый туркменский манат", "узбекских сумов",
+            "гривен", "чешских крон", "шведских крон",
+            "швейцарский франк", "эфиопских быров", "сербских динаров",
+            "рэндов", "вон", "иен",
+            "кьятов"
+        ]
 
-        user_data['daily_valute'] = text
-        if user_data['daily_type'] == 'both':
+        user_data['daily_valute'] = text.lower()
+        if user_data['daily_valute'] in currencies or user_data['daily_valute'] in ["dol", "dollar", "бакс", "доллар", "американский доллар", "американская валюта", "ljkkfh",
+                            ",frc", "долларов", "баксов", "доллара", "бакса", "курс доллара"]:
+            if user_data['daily_type'] == 'both':
 
-            await update.message.reply_text(
-                text="Теперь напишите название города для рассылки:")
+                await update.message.reply_text(
+                    text="Теперь напишите название города для рассылки:")
 
 
-            user_data['waiting_for'] = 'confirm_daily_city'
+                user_data['waiting_for'] = 'confirm_daily_city'
+
+            else:
+                user_data["waiting_for"] = None
+                if user_data['daily_type'] == 'weather':
+                    daily_type_for_message = "Погода"
+                elif user_data['daily_type'] == 'currency':
+                    daily_type_for_message = "Курсы валют"
+                elif user_data['daily_type'] == 'both':
+                    daily_type_for_message = "Погода и валюта"
+                else:
+                    daily_type_for_message = None
+                if user_data.get('daily_city') is not None and user_data.get('daily_city') != '':
+                    city = user_data['daily_city']
+                else:
+                    city = 'NULL'
+
+                save_daily_config(
+
+                    user_id=update.effective_user.id,
+                    user_name=update.effective_user.name,
+                    chat_id=update.effective_chat.id,
+                    daily_type=user_data['daily_type'],
+                    city=city,
+                    valute=text,
+                    daily_schedule=user_data['daily_schedule'],
+
+                )
+
+                await update.message.reply_text(
+
+                    f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
+                    f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
+                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
+                user_data['daily_valute'] = None
+                user_data['daily_city'] = None
+                user_data['daily_mode'] = 'ON'
+                save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
 
         else:
-            user_data["waiting_for"] = None
-            if user_data['daily_type'] == 'weather':
-                daily_type_for_message = "Погода"
-            elif user_data['daily_type'] == 'currency':
-                daily_type_for_message = "Курсы валют"
-            elif user_data['daily_type'] == 'both':
-                daily_type_for_message = "Погода и валюта"
-            else:
-                daily_type_for_message = None
-            if user_data.get('daily_city') is not None and user_data.get('daily_city') != '':
-                city = user_data['daily_city']
-            else:
-                city = 'NULL'
-
-            save_daily_config(
-
-                user_id=update.effective_user.id,
-                user_name=update.effective_user.name,
-                chat_id=update.effective_chat.id,
-                daily_type=user_data['daily_type'],
-                city=city,
-                valute=text,
-                daily_schedule=user_data['daily_schedule'],
-
-            )
-
-            await update.message.reply_text(
-
-                f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
-                f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
-                f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
-            user_data['daily_valute'] = None
-            user_data['daily_city'] = None
-            user_data['daily_mode'] = 'ON'
-            save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
-
+            await update.message.reply_text(f"Валюта {text} не найдена.\nВы можете посмотреть список всех валют с верным написанием во вкладке Дополнительно->Список всех валют.")
     elif user_data['waiting_for'] == 'bug_report':
         user_name = update.effective_user.name
-        await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый разработчик!\nВам репорт от юзера {user_name}:\n{text}")
+        await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый, мудрейший и прекраснейший разработчик!\nВам репорт от юзера {user_name}:\n\n{text}")
         if update.effective_user.id != 5449932947:
             await update.message.reply_text("Репорт отправлен! Спасибо за участие в развитии проекта!")
         else:

@@ -292,7 +292,7 @@ async def _async_send_daily(application, time):
 
                  else:
                      response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!"
-
+                 await application.send_message(f"Вот ваша ежедневная рассылка о валюте:")
                  await application.bot.send_message(config[1], response)
 
 
@@ -312,5 +312,6 @@ async def _async_send_daily(application, time):
                  else:
                      response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
 
+                 await application.send_message(f"Вот ваша ежедневная рассылка о погоде:")
                  await application.bot.send_message(config[1], response)
 

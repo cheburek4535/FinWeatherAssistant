@@ -58,7 +58,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
                 'base': 'USD',
                 'rate': dollar_currency['Value'],
                 'previous': dollar_currency['Previous'],
-                'name': 'Американский доллар'
+                'name': 'Доллар США'
             }
 
         if base.upper() in valutes:
@@ -109,7 +109,7 @@ def get_currency_rates(base: str = 'USD', get_all=False) -> dict:
 # print(get_currency_rates('EUR'))
 # print(get_currency_rates('бакс'))
 # print(get_currency_rates('юань'))
-# print(get_currency_rates('лир'))
+
 # print(get_currency_rates('доллар'))
 
 #print(get_currency_rates('AUD', get_all=True))
