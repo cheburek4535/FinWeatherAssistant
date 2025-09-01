@@ -1,20 +1,29 @@
+from sqlalchemy.orm.sync import update
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from database.crud import get_daily_mode
 
-def get_main_keyboard():
-    return ReplyKeyboardMarkup([
-        ["🌤️ Получить погоду", "💵 Курс валют"],
-        ["📔 История запросов", "📬 Рассылка"],
-        ["📖 Дополнительно", "🎖️ Premium"],
-        ["👾 Баг-репорт"]
-    ], resize_keyboard=True)
+def get_main_keyboard(update: Update):
+    if update.effective_user.id != 6278046215:
+        return ReplyKeyboardMarkup([
+            ["🌤️ Получить погоду", "💵 Курс валют"],
+            ["📔 История запросов", "📬 Рассылка"],
+            ["📖 Дополнительно", "🎖️ Premium"],
+            ["👾 Баг-репорт"]
+        ], resize_keyboard=True)
+    else:
+        return ReplyKeyboardMarkup([
+            ["🌤️ Получить погоду", "💵 Курс валют"],
+            ["📔 История запросов", "📬 Рассылка"],
+            ["📖 Дополнительно", "🎖️ Premium"],
+            ["👾 Баг-репорт", "👽Dev-Tools"]
+        ], resize_keyboard=True)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     await update.message.reply_text(
         f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
-        reply_markup=get_main_keyboard()
+        reply_markup=get_main_keyboard(update)
     )
     dm = get_daily_mode(update.effective_user.name)
     if dm == 'ON':

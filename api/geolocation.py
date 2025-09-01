@@ -49,12 +49,12 @@ async def handle_location(update: Update, context: CallbackContext) -> None:
                 req_data=str(user_city),
                 resp_data=response
             )
-            await update.message.reply_text(response, reply_markup=get_main_keyboard())
+            await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
             user_data['waiting_for'] = None
 
 
         else:
-            await update.message.reply_text("Не удалось получить данные о погоде 😔.\nПожалуйста, попробуйте ввести город вручную", reply_markup=get_main_keyboard())
+            await update.message.reply_text("Не удалось получить данные о погоде 😔.\nПожалуйста, попробуйте ввести город вручную", reply_markup=get_main_keyboard(update))
 
 
 

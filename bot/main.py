@@ -36,15 +36,10 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     else:
         response = "Не удалось получить данные об истории запросов 😔."
 
-    await update.message.reply_text(response, reply_markup=get_main_keyboard())
+    await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
 
 
 
-
-#async def back_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_data = context.user_data
-    get_main_keyboard()
-    user_data['waiting_for'] = None
 
 async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #await update.message.reply_text('Инструкция по взаимодействию с ботом:\n1.Кнопки "Получить погоду" и "Курс валют" позволяют узнать погоду по городу который вы введете или отправите геолокацию и получить курс валют по названию')
@@ -54,6 +49,8 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 async def premium_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Эта функция пока недоступна, ожидайте в ближайшем обновлении.")
+
+
 async def bug_report_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id != 5449932947:
         await update.message.reply_text("Пожалуйста, опишите обнаруженный вами баг или ошибку.\nСообщение отправится разработчику, и проект станет лучше✨.\nБудем благодарны за подробное описание!")
@@ -61,6 +58,13 @@ async def bug_report_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(
             "Тима, ты заебал иди нахуй членосос, ладно без негатива, удиви меня кинь какую нибудь хуйню типа это баг репорт")
     context.user_data['waiting_for'] = 'bug_report'
+
+async def dev_tools_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text("Великий и всемогущий прекрасный разработчик!\nВведите id или никнейм юзера для сами знаете чего.")
+    context.user_data['waiting_for'] = 'dev_tools_confirm_id'
+    context.user_data['id_for_devtools'] = None
+
+
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
     user_data = context.user_data
@@ -86,11 +90,30 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 req_data=text,
                 resp_data=response
             )
+
+            if 'дождь' in weather_data['description']:
+                photo = 'https://imgs.search.brave.com/FrAZSxk-OcJL9rgq5bqWVaYwxWahT99uJueKpmBnGL0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTQ3/NjE4OTk4My9waG90/by9zdW1tZXItcmFp/bi1yYWluZHJvcHMt/YmFkLXdlYXRoZXIt/ZGVwcmVzc2lvbi5q/cGc_cz02MTJ4NjEy/Jnc9MCZrPTIwJmM9/SXdKWGQyYms1TzY1/YUY1WFp3b0ItV0pp/RnBDSXJtYlpsdGdi/UVRYTk5raz0'
+            elif 'пасмурно' in weather_data['description'] or 'облачность' in weather_data['description'] or 'облачно' in weather_data['description']:
+                photo = 'https://imgs.search.brave.com/bfTijEBuXl5-ByeGFU8RyVwxFXKcA7AlIJYEkQ2zyI4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly95Ymlz/LnJ1L3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIzLzA5L3Bhc211/cm5vZS1uZWJvLTEz/LndlYnA'
+            elif 'ясно' in weather_data['description'] or 'солнце' in weather_data['description'] or 'солнечно' in weather_data['description']:
+                photo = 'https://imgs.search.brave.com/94yUO0S20ReZBvTMh-HhW4cuYDkYHCQaCsLGZA53jDw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTA0/Njg1MTIzOC9ydS8l/RDElODQlRDAlQkUl/RDElODIlRDAlQkUv/JUQxJTgxJUQwJUJF/JUQwJUJCJUQwJUJE/JUQxJTg2JUQwJUI1/LSVEMSU4MSVEMCVC/MiVEMCVCNSVEMSU4/MiVEMCVCOCVEMSU4/Mi0lRDAlQkQlRDAl/QjAtJUQxJTg0JUQw/JUJFJUQwJUJEJUQw/JUI1LSVEMCVCMyVE/MCVCRSVEMCVCQiVE/MSU4MyVEMCVCMSVE/MCVCRSVEMCVCMyVE/MCVCRS0lRDAlQkQl/RDAlQjUlRDAlQjEl/RDAlQjAuanBnP2I9/MSZzPTYxMng2MTIm/dz0wJms9MjAmYz1m/RjFFSE9mMm9PcHJK/cFBUMm9EQl9iV3Nh/ZEVTYWt2elRSUzBv/V3AxZHhVPQ'
+            elif 'снег' in weather_data['description'] or 'снегопад' in weather_data['description']:
+                photo = 'https://imgs.search.brave.com/lrSBDeUU8sGJBhbdq-7St7FOjo_tAEHHTW2BqoIPz8c/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdC5k/ZXBvc2l0cGhvdG9z/LmNvbS8xMDQzMDcz/LzMwNDAvaS82MDAv/ZGVwb3NpdHBob3Rv/c18zMDQwMDMxNy1z/dG9jay1waG90by1z/bm93LmpwZw'
+            else:
+                photo = 'https://imgs.search.brave.com/2yaqlZEQTb8edAq9CWgvkAkyjaD5K0M_loUCkzuXHN8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNTAz/NDk1MzUyL3J1LyVE/MSU4NCVEMCVCRSVE/MSU4MiVEMCVCRS8l/RDElODElRDAlQkYl/RDElODMlRDElODIl/RDAlQkQlRDAlQjgl/RDAlQkElRDAlQkUl/RDAlQjIlRDAlQkUl/RDAlQjUtYXJyYXkt/dmxhLmpwZz9zPTYx/Mng2MTImdz0wJms9/MjAmYz1XRDFhOEMw/Q2tUZG8tMlVGQzJy/RlVqVUFaVExER192/bUZuMmlNeV9CNkd3/PQ'
+
+            await update.message.reply_photo(photo=photo, caption=response, reply_markup=get_main_keyboard(update))
         else:
-             response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
+            if text != "⬅️Назад":
+                response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
+                await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
+
+
         if text == "⬅️Назад":
             response = "Возвращено назад"
-        await update.message.reply_text(response, reply_markup=get_main_keyboard())
+            await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
+
+
         user_data['waiting_for'] = None
 
 
@@ -131,7 +154,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         if text == "⬅️Назад":
             response = "Возвращено назад"
 
-        await update.message.reply_text(response, reply_markup=get_main_keyboard())
+        await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
         user_data['waiting_for'] = None
 
 
@@ -186,7 +209,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             await update.message.reply_text(
                     f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"{valute_for_message}\n'
                     f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
-                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
+                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard(update))
             user_data['daily_city'] = None
             user_data['daily_valute'] = None
             user_data['daily_mode'] = 'ON'
@@ -264,7 +287,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
                     f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
                     f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
-                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard())
+                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard(update))
                 user_data['daily_valute'] = None
                 user_data['daily_city'] = None
                 user_data['daily_mode'] = 'ON'
@@ -281,6 +304,15 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             await update.message.reply_text("Нет иди нахуй.")
         user_data['waiting_for'] = None
 
+
+    elif user_data['waiting_for'] == 'dev_tools_confirm_id':
+        await update.message.reply_photo()
+        await update.message.reply_text(f"Теперь введите сообщение для юзера {text}")
+        user_data['id_for_devtools'] = text
+        user_data['waiting_for'] = 'dev_tools_confirm_message'
+
+    elif user_data['waiting_for'] == 'dev_tools_confirm_message':
+        await context.bot.send_message(chat_id=user_data['id_for_devtools'], text=text)
 
 
 
@@ -332,6 +364,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^📖 Дополнительно$"), help_handler))
     application.add_handler(MessageHandler(filters.Regex("^🎖️ Premium$"), premium_handler))
     application.add_handler(MessageHandler(filters.Regex("^👾 Баг-репорт$"), bug_report_handler))
+    application.add_handler(MessageHandler(filters.Regex("^👽Dev-Tools$"), dev_tools_handler))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
