@@ -1,4 +1,5 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler, JobQueue
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
@@ -8,6 +9,7 @@ from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
 from bot.daily import button_handler, daily_handler, send_daily_job
 import csv
+import os
 from pathlib import Path
 import json
 from datetime import datetime
@@ -17,12 +19,12 @@ import asyncio
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название города,\nили отправьте геолокацию:", reply_markup=get_location_keyboard())
+    await update.message.reply_text("Введите название города,\nили отправьте <u>геолокацию</u>:", reply_markup=get_location_keyboard(), parse_mode=ParseMode.HTML)
     context.user_data['waiting_for'] = 'weather_city'
 
 # обработчик кнопки курсы валют
 async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название валюты в родительном падеже,\nили выберите из списка:", reply_markup=get_currency_keyboard())
+    await update.message.reply_text("Введите название валюты\nили выберите из <u>списка</u>:", reply_markup=get_currency_keyboard(), parse_mode=ParseMode.HTML)
     context.user_data['waiting_for'] = 'currency_valute'
 
 async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -43,8 +45,8 @@ async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #await update.message.reply_text('Инструкция по взаимодействию с ботом:\n1.Кнопки "Получить погоду" и "Курс валют" позволяют узнать погоду по городу который вы введете или отправите геолокацию и получить курс валют по названию')
-    await update.message.reply_text("Ниже приведены кнопки для получения инструкции по взаимодейтсвию с ботом\nА также список всех валют, курсы которых которые можно можно запросить у бота.\n"
-                                    "Если у вас возникли другие вопросы, вы можете связаться напрямую с разработчиком через кнопку 'Баг-репорт.'", reply_markup=get_help_keyboard())
+    await update.message.reply_text("<b>Ниже</b> приведены кнопки для получения <u>инструкции</u> по взаимодейтсвию с ботом\nА также <u>список</u> всех валют, курсы которых которые можно можно запросить у бота.\n"
+                                    "Если у вас возникли другие вопросы, вы можете связаться напрямую с разработчиком через кнопку <u>'Баг-репорт'</u>.", reply_markup=get_help_keyboard(), parse_mode="HTML")
 
 
 async def premium_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -53,10 +55,10 @@ async def premium_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def bug_report_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.effective_user.id != 5449932947:
-        await update.message.reply_text("Пожалуйста, опишите обнаруженный вами баг или ошибку.\nСообщение отправится разработчику, и проект станет лучше✨.\nБудем благодарны за подробное описание!")
+        await update.message.reply_text("Пожалуйста, опишите обнаруженный вами <b>баг</b> или <b>ошибку</b>.\nСообщение отправится разработчику, и проект станет <b>лучше</b>✨.\nБудем благодарны за подробное описание!", parse_mode="HTML")
     else:
         await update.message.reply_text(
-            "Тима, ты заебал иди нахуй членосос, ладно без негатива, удиви меня кинь какую нибудь хуйню типа это баг репорт")
+            "<b>Тима, ты заебал иди нахуй членосос, ладно без негатива, удиви меня кинь какую нибудь хуйню типа это баг репорт</b>", parse_mode="HTML")
     context.user_data['waiting_for'] = 'bug_report'
 
 async def dev_tools_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -76,7 +78,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
         weather_data = get_weather(text, weather_api_key)
         if weather_data:
             response = (
-                f"🌆Погода в городе {weather_data['city']}:\n"
+                f"🌆<i>Погода в городе {weather_data['city']}:</i>\n"
                 f"🌡️Температура: {weather_data['temp']}°C\n"
                 f"🤗Ощущается как: {weather_data['feels_like']}°C\n"
                 f"🌥️Общее состояние: {weather_data['description']}\n"
@@ -102,7 +104,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             else:
                 photo = 'https://imgs.search.brave.com/2yaqlZEQTb8edAq9CWgvkAkyjaD5K0M_loUCkzuXHN8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNTAz/NDk1MzUyL3J1LyVE/MSU4NCVEMCVCRSVE/MSU4MiVEMCVCRS8l/RDElODElRDAlQkYl/RDElODMlRDElODIl/RDAlQkQlRDAlQjgl/RDAlQkElRDAlQkUl/RDAlQjIlRDAlQkUl/RDAlQjUtYXJyYXkt/dmxhLmpwZz9zPTYx/Mng2MTImdz0wJms9/MjAmYz1XRDFhOEMw/Q2tUZG8tMlVGQzJy/RlVqVUFaVExER192/bUZuMmlNeV9CNkd3/PQ'
 
-            await update.message.reply_photo(photo=photo, caption=response, reply_markup=get_main_keyboard(update))
+            await update.message.reply_photo(photo=photo, caption=response, reply_markup=get_main_keyboard(update), parse_mode=ParseMode.HTML)
         else:
             if text != "⬅️Назад":
                 response = "Не удалось получить данные о погоде 😔.\nПожалуйста, проверьте правильность написания названия города!"
@@ -130,12 +132,13 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             currency_data = get_currency_rates(text)
 
         if currency_data:
-            response = (
+            await update.message.reply_photo(photo="https://memepedia.ru/wp-content/uploads/2019/06/stonks-template.png", caption=
                 f"💱Курс валюты: {currency_data['name']}:\n"
                 f"🕒Время: {currency_data['timestamp'][11:16]}\n"
                 f"💰Текущий курс: {currency_data['rate']:.2f}₽\n"
                 f"⏳Предыдущий курс: {currency_data['previous']:.2f}₽\n"
-                f"📈Изменение на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)"
+                f"📈Изменение за полдня на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)",
+
             )
 
             save_request(
@@ -143,18 +146,23 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 user_name=update.effective_user.name,
                 req_type='currency',
                 req_data=str(text),
-                resp_data=response
+                resp_data=f"💱Курс валюты: {currency_data['name']}:\n"
+                f"🕒Время: {currency_data['timestamp'][11:16]}\n"
+                f"💰Текущий курс: {currency_data['rate']:.2f}₽\n"
+                f"⏳Предыдущий курс: {currency_data['previous']:.2f}₽\n"
+                f"📈Изменение за полдня на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)"
             )
 
         else:
 
 
-            response = "Не удалось получить данные о курсах валют 😔.\nПожалуйста, проверьте правильность написания названия валюты!\nПравильные названия валют для запроса есть во вкладке Дополнительно->Список всех валют."
+            response = f"Валюта {text} <b>не найдена.<b>\nВы можете посмотреть <i>список</i> всех валют с верным написанием во вкладке <b>Дополнительно->Список всех валют</b>."
 
         if text == "⬅️Назад":
             response = "Возвращено назад"
 
-        await update.message.reply_text(response, reply_markup=get_main_keyboard(update))
+        if response:
+            await update.message.reply_text(response, reply_markup=get_main_keyboard(update), parse_mode='HTML')
         user_data['waiting_for'] = None
 
 
@@ -162,7 +170,10 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     elif user_data.get("waiting_for") == "confirm_daily_city":
 
-        file_path = Path(__file__).parent.parent / 'database' / 'city.csv'
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(BASE_DIR, '..', 'database', 'city.csv')
+        file_path = os.path.abspath(file_path)
+
         cities = set()
         with open(file_path, 'r', encoding='cp1251', newline='') as csvfile:
 
@@ -201,15 +212,15 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                     chat_id=update.effective_chat.id,
                     daily_type=user_data['daily_type'],
                     city=user_city,
-                    valute=user_data['daily_valute'] if user_data['daily_valute'] is not None else 'NULL',
+                    valute=user_data.get('daily_valute') if user_data.get('daily_valute') is not None else 'NULL',
                     daily_schedule=user_data['daily_schedule'],
 
                 )
 
             await update.message.reply_text(
-                    f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"{valute_for_message}\n'
-                    f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
-                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard(update))
+                    f'Отлично! Настройка рассылки <b>завершена<b>.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"{valute_for_message}\n'
+                    f'Теперь вы можете <b>отменить рассылку или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
+                    f'<i>(доступно только премиум пользователям)</i>', reply_markup=get_main_keyboard(update), parse_mode='HTML')
             user_data['daily_city'] = None
             user_data['daily_valute'] = None
             user_data['daily_mode'] = 'ON'
@@ -217,7 +228,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
         else:
 
-            await update.message.reply_text("Город не найден. Проверьте правильность написания.")
+            await update.message.reply_text("Город <b>не найден</b>. Проверьте правильность написания.")
 
 
 
@@ -285,28 +296,28 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
                 await update.message.reply_text(
 
-                    f'Отлично! Настройка рассылки завершена.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
-                    f'Теперь вы можете отменить рассылку или добавить свое время и несколько валют и городов для рассылок\n'
-                    f' (доступно только премиум пользователям)', reply_markup=get_main_keyboard(update))
+                    f'Отлично! Настройка рассылки <b>завершена<b>.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
+                    f'Теперь вы можете <b>отменить рассылку или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
+                    f'<i>(доступно только премиум пользователям)</i>', reply_markup=get_main_keyboard(update), parse_mode='HTML')
                 user_data['daily_valute'] = None
                 user_data['daily_city'] = None
                 user_data['daily_mode'] = 'ON'
                 save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
 
         else:
-            await update.message.reply_text(f"Валюта {text} не найдена.\nВы можете посмотреть список всех валют с верным написанием во вкладке Дополнительно->Список всех валют.")
+            await update.message.reply_text(f"Валюта {text} <b>не найдена.<b>\nВы можете посмотреть <i>список</i> всех валют с верным написанием во вкладке <b>Дополнительно->Список всех валют</b>.", parse_mode='HTML')
     elif user_data['waiting_for'] == 'bug_report':
         user_name = update.effective_user.name
         await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый, мудрейший и прекраснейший разработчик!\nВам репорт от юзера {user_name}:\n\n{text}")
         if update.effective_user.id != 5449932947:
-            await update.message.reply_text("Репорт отправлен! Спасибо за участие в развитии проекта!")
+            await update.message.reply_text("Репорт отправлен! <b>Спасибо</b> за участие в развитии проекта!", parse_mode='HTML')
         else:
             await update.message.reply_text("Нет иди нахуй.")
         user_data['waiting_for'] = None
 
 
     elif user_data['waiting_for'] == 'dev_tools_confirm_id':
-        await update.message.reply_photo()
+
         await update.message.reply_text(f"Теперь введите сообщение для юзера {text}")
         user_data['id_for_devtools'] = text
         user_data['waiting_for'] = 'dev_tools_confirm_message'
@@ -323,19 +334,19 @@ def init_scheduler(application):
     scheduler = BackgroundScheduler()
     scheduler.add_job(
         send_daily_job,
-        trigger=CronTrigger(hour=9, minute=0),
+        trigger=CronTrigger(hour=6, minute=0),
         args=[application, 'Mon']
     )
 
     scheduler.add_job(
         send_daily_job,
-        trigger=CronTrigger(hour=13, minute=30),
+        trigger=CronTrigger(hour=10, minute=30),
         args=[application, 'Aft']
     )
 
     scheduler.add_job(
         send_daily_job,
-        trigger=CronTrigger(hour=18, minute=0),
+        trigger=CronTrigger(hour=15, minute=0),
         args=[application, 'Evn']
     )
 

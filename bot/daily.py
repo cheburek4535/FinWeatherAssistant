@@ -1,3 +1,5 @@
+from telegram.constants import ParseMode
+
 from bot.keyboard import get_main_keyboard
 from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode, get_daily_config_without_time
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
@@ -12,8 +14,8 @@ import json
 
 async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
-    text = ('Вы можете включить ежедневную рассылку уведомления о погоде и курсах валют.\n'
-                                    'Просто укажите время, валюту или город нажав кнопку ниже.\n'
+    text = ('Вы можете включить <b>ежедневную рассылку</b> уведомления о погоде и курсах валют.\n'
+                                    'Просто укажите <i>время, валюту и <i>город</i> нажав кнопку ниже.\n'
                                     'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже')
     if get_daily_mode(update.effective_user.id) == 'ON':
         inline_keyboard = [
@@ -30,9 +32,9 @@ async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         ]
     reply_markup = InlineKeyboardMarkup(inline_keyboard)
     if update.message:
-        await update.message.reply_text(text, reply_markup=reply_markup)
+        await update.message.reply_text(text, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
     elif update.callback_query:
-        await update.callback_query.edit_message_text(text, reply_markup=reply_markup)
+        await update.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode=ParseMode.HTML)
 
 
 

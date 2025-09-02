@@ -1,5 +1,6 @@
 from sqlalchemy.orm.sync import update
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 from database.crud import get_daily_mode
 
@@ -21,9 +22,9 @@ def get_main_keyboard(update: Update):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    await update.message.reply_text(
-        f"Привет, {user.first_name}! Я твой финансово-погодный ассистент.",
-        reply_markup=get_main_keyboard(update)
+    await update.message.reply_photo(photo='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSX-mgYlbGEvb5zHDa1TikrQUqFYNafIborng&s',
+       caption= f"<b>Привет, {user.first_name}! Я твой финансово-погодный ассистент.</b>",
+        reply_markup=get_main_keyboard(update), parse_mode=ParseMode.HTML
     )
     dm = get_daily_mode(update.effective_user.name)
     if dm == 'ON':
