@@ -2,7 +2,7 @@ from sqlalchemy.orm.sync import update
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
-from database.crud import get_daily_mode
+from database.crud import get_daily_mode, show_story
 
 def get_main_keyboard(update: Update):
     if update.effective_user.id != 6278046215:
@@ -35,12 +35,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         context.user_data['daily_mode'] = 'OFF'
     context.user_data['daily_valute'] = None
 
-def get_currency_keyboard():
-    return ReplyKeyboardMarkup([
+def get_currency_keyboard(update: Update):
+    keyboard = [
         ['$ Доллар 💵', '€ Евро 💶'],
         ['¥ Юань 💴', '£ Фунт стерлингов 💷'],
         ['⬅️Назад']
-    ], resize_keyboard=True)
+    ]
+    last_req = show_story(user_id=update.effective_user.id, get_last=True, req_type='currency')
+    if last_req is not None and str(last_req) not in ('$ Доллар 💵', '€ Евро 💶', '¥ Юань 💴', '£ Фунт стерлингов 💷', 'Доллар', 'Евро', 'Фунт стерлингов', 'Юань'):
+        keyboard.append([last_req])
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
 
 def get_inline_currency_keyboard():
     keyboard = [
@@ -53,11 +57,19 @@ def get_inline_currency_keyboard():
     return reply_markup
 
 
-def get_location_keyboard():
-    keyboard = [
-        [KeyboardButton(text="Отправить мой город", request_location=True)],
-        ['⬅️Назад']
-    ]
+def get_location_keyboard(update: Update):
+    last_req = show_story(user_id=update.effective_user.id, get_last=True)
+    if last_req is not None:
+        keyboard = [
+            [KeyboardButton(text="📍Отправить мой город", request_location=True)],
+            [KeyboardButton(text=str(last_req))],
+            ['⬅️Назад']
+        ]
+    else:
+        keyboard = [
+            [KeyboardButton(text="📍Отправить мой город", request_location=True)],
+            ['⬅️Назад']
+        ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=True)
 
 def get_story_keyboard():
@@ -74,8 +86,8 @@ def get_add_keyboard():
 
 def get_help_keyboard():
     keyboard = [
-        [InlineKeyboardButton("Инструкция по боту", callback_data='give_instruction')],
-         [InlineKeyboardButton("Список всех валют", callback_data='give_all_valutes'),]
+        [InlineKeyboardButton("📄Инструкция по боту", callback_data='give_instruction')],
+         [InlineKeyboardButton("💸Список всех валют", callback_data='give_all_valutes'),]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup

@@ -1,30 +1,27 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, CallbackContext, ContextTypes, CallbackQueryHandler, JobQueue
 from api.weather_api import get_weather, weather_api_key
 from api.currency import get_currency_rates
-from database.crud import save_request, show_story, save_daily_config, get_daily_mode, save_daily_mode
-from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_inline_currency_keyboard, get_help_keyboard
+from database.crud import save_request, show_story, save_daily_config, save_daily_mode
+from bot.keyboard import get_main_keyboard, start, get_currency_keyboard, get_location_keyboard, get_help_keyboard
 from api.geolocation import handle_location
 from api.timezone import get_local_time_by_city
 from bot.daily import button_handler, daily_handler, send_daily_job
 import csv
 import os
-from pathlib import Path
-import json
-from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import asyncio
 
 # Обработчик кнопки погода
 async def weather_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название города,\nили отправьте <u>геолокацию</u>:", reply_markup=get_location_keyboard(), parse_mode=ParseMode.HTML)
+    await update.message.reply_text("Введите название города,\nили отправьте <u>геолокацию</u>:", reply_markup=get_location_keyboard(update), parse_mode=ParseMode.HTML)
     context.user_data['waiting_for'] = 'weather_city'
 
 # обработчик кнопки курсы валют
 async def currency_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Введите название валюты\nили выберите из <u>списка</u>:", reply_markup=get_currency_keyboard(), parse_mode=ParseMode.HTML)
+    await update.message.reply_text("Введите название валюты\nили выберите из <u>списка</u>:", reply_markup=get_currency_keyboard(update), parse_mode=ParseMode.HTML)
     context.user_data['waiting_for'] = 'currency_valute'
 
 async def story_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -138,7 +135,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 f"💰Текущий курс: {currency_data['rate']:.2f}₽\n"
                 f"⏳Предыдущий курс: {currency_data['previous']:.2f}₽\n"
                 f"📈Изменение за полдня на {(currency_data['rate'] - currency_data['previous']):.2f}₽ ({((currency_data['rate'] * 100) / currency_data['previous']) - 100:.2f}%)",
-
+                                             reply_markup=get_main_keyboard(update)
             )
 
             save_request(
@@ -305,7 +302,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 save_daily_mode(user_name=update.effective_user.name, user_id=update.effective_user.id, daily_mode=user_data['daily_mode'])
 
         else:
-            await update.message.reply_text(f"Валюта {text} <b>не найдена.<b>\nВы можете посмотреть <i>список</i> всех валют с верным написанием во вкладке <b>Дополнительно->Список всех валют</b>.", parse_mode='HTML')
+            await update.message.reply_text(f"Валюта {text} <b>не найдена.</b>\nВы можете посмотреть <i>список</i> всех валют с верным написанием во вкладке <b>Дополнительно->Список всех валют</b>.", parse_mode='HTML')
     elif user_data['waiting_for'] == 'bug_report':
         user_name = update.effective_user.name
         await context.bot.send_message(chat_id=6278046215, text=f"Великий и многоуважаемый, мудрейший и прекраснейший разработчик!\nВам репорт от юзера {user_name}:\n\n{text}")

@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 from Logger.my_logger import logger
-import urllib.request
+
 
 
 

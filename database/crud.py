@@ -1,8 +1,8 @@
-from cffi.model import char_array_type
-from pycparser.c_ast import Return
+
 
 from database.models import Session, UserRequest, DailyConfig, DailyMode, Users
 from Logger.my_logger import logger
+from datetime import timedelta
 
 def save_request(user_id: int, user_name: str, req_type: str, req_data: str, resp_data: str):
     """Сохраняет запрос пользователя в БД"""
@@ -26,20 +26,27 @@ def save_request(user_id: int, user_name: str, req_type: str, req_data: str, res
     finally:
         session.close()
 
-def show_story(user_id):
+def show_story(user_id: int, get_last: bool=False, req_type: str='weather'):
     session = Session()
-    user_story = session.query(UserRequest).filter(UserRequest.user_id == user_id).all()
-    lines = []
-    for req in user_story:
-        time_str = req.timestamp.isoformat()[11:16] if req.timestamp else "No timestamp"
+    if not get_last:
+        user_story = session.query(UserRequest).filter(UserRequest.user_id == user_id).all()
+        lines = []
 
-        line = f"{time_str} - {req.request_data}"
-        lines.append(line)
+        for req in user_story:
+            true_time = req.timestamp + timedelta(hours=3)
+            time_str = true_time.isoformat()[11:16] if req.timestamp else "No timestamp"
 
-    session.close()
-    return lines
+            line = f"{time_str} - {req.request_data}"
+            lines.append(line)
 
+        session.close()
+        return lines
 
+    else:
+        user_story = session.query(UserRequest).filter(UserRequest.user_id == user_id, UserRequest.request_type==req_type).order_by(UserRequest.id.desc()).first()
+        last_req = user_story.request_data if user_story else None
+        session.close()
+        return last_req
 
 def save_daily_config(user_id: int, user_name: str, chat_id: int, daily_type:str, city: str, valute: str, daily_schedule:str):
     session = Session()
@@ -186,7 +193,7 @@ def get_all_users_with_daily_mode():
 # def save_user_data(user_name: str, chat_id: int, data: str):
 #     session = Session()
 #     try:
-#story_lines = show_story(6278046215)
+#print(show_story(6278046215, True, 'currency'))
 
 #for line in story_lines:
 

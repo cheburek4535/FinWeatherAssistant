@@ -1,34 +1,33 @@
 from telegram.constants import ParseMode
 
-from bot.keyboard import get_main_keyboard
-from database.crud import save_daily_config, delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode, get_daily_config_without_time
+
+from database.crud import delete_daily_config, save_daily_mode, get_daily_mode, get_daily_config, get_all_users_with_daily_mode, get_daily_config_without_time
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update
-from telegram.ext import CallbackContext, Updater, CommandHandler, CallbackQueryHandler, ContextTypes
-from bot.keyboard import get_inline_currency_keyboard, get_main_keyboard, get_help_keyboard
-from datetime import datetime
+from telegram.ext import CallbackContext, ContextTypes
+from bot.keyboard import get_help_keyboard
+
 from api.currency import get_currency_rates
 from api.weather_api import get_weather, weather_api_key
 from api.timezone import get_local_time_by_city
-#from bot.main import help_handler
-import json
+
 
 async def daily_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user_data = context.user_data
     text = ('Вы можете включить <b>ежедневную рассылку</b> уведомления о погоде и курсах валют.\n'
-                                    'Просто укажите <i>время, валюту и <i>город</i> нажав кнопку ниже.\n'
+                                    'Просто укажите <i>время, валюту</i> и <i>город</i> нажав кнопку ниже.\n'
                                     'Также вы можете узнать более подробную информацию тоже нажав на вторую кнопку ниже')
     if get_daily_mode(update.effective_user.id) == 'ON':
         inline_keyboard = [
-            [InlineKeyboardButton("Добавить конфиг(Premium)", callback_data='add_daily'),
-             InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')],
-            [InlineKeyboardButton("Изменить рассылку", callback_data='change_daily'),
-             InlineKeyboardButton("Выключить рассылку", callback_data='off_daily')],
-            [InlineKeyboardButton("Моя конфигурация рассылки", callback_data='show_config'),]
+            [InlineKeyboardButton("➕Добавить конфиг(Premium)", callback_data='add_daily'),
+             InlineKeyboardButton("📘Подробнее", callback_data='daily_show_more_about')],
+            [InlineKeyboardButton("🔄Изменить рассылку", callback_data='change_daily'),
+             InlineKeyboardButton("🔴Выключить рассылку", callback_data='off_daily')],
+            [InlineKeyboardButton("❓Моя конфигурация рассылки", callback_data='show_config'),]
         ]
     else:
         inline_keyboard = [
-            [InlineKeyboardButton("Включить рассылку", callback_data='daily_on')],
-             [InlineKeyboardButton("Подробнее", callback_data='daily_show_more_about')]
+            [InlineKeyboardButton("🟢Включить рассылку", callback_data='daily_on')],
+             [InlineKeyboardButton("📘Подробнее", callback_data='daily_show_more_about')]
         ]
     reply_markup = InlineKeyboardMarkup(inline_keyboard)
     if update.message:
@@ -42,9 +41,9 @@ async def daily_on(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("О погоде", callback_data='daily_is_weather'),
-         InlineKeyboardButton("О валюте", callback_data='daily_is_currency')],
-        [InlineKeyboardButton("О погоде и валюте", callback_data='daily_is_both')],
+        [InlineKeyboardButton("🌦️О погоде", callback_data='daily_is_weather'),
+         InlineKeyboardButton("💸О валюте", callback_data='daily_is_currency')],
+        [InlineKeyboardButton("🌦️💸О погоде и валюте", callback_data='daily_is_both')],
         [InlineKeyboardButton("⬅️Назад", callback_data='back_to_daily_handler')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -56,13 +55,13 @@ async def daily_timing_set(update: Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
     keyboard = [
-        [InlineKeyboardButton("Утром", callback_data='daily_in_morning'),
-         InlineKeyboardButton("Днём", callback_data='daily_in_afternoon'),
-         InlineKeyboardButton("Вечером", callback_data='daily_in_evening')],
-        [InlineKeyboardButton("Утром и днём", callback_data='daily_in_morning_and_afternoon'),
-         InlineKeyboardButton("Утром и вечером", callback_data='daily_in_morning_and_evening'),
-         InlineKeyboardButton("Днём и вечером", callback_data='daily_in_afternoon_and_evening')],
-        [InlineKeyboardButton("Утром Днём и вечером", callback_data='daily_in_three')],
+        [InlineKeyboardButton("🌅Утром", callback_data='daily_in_morning'),
+         InlineKeyboardButton("🌞Днём", callback_data='daily_in_afternoon'),
+         InlineKeyboardButton("🌙Вечером", callback_data='daily_in_evening')],
+        [InlineKeyboardButton("⏳Утром/днём", callback_data='daily_in_morning_and_afternoon'),
+         InlineKeyboardButton("⏳Утром/вечером", callback_data='daily_in_morning_and_evening'),
+         InlineKeyboardButton("⏳Днём/вечером", callback_data='daily_in_afternoon_and_evening')],
+        [InlineKeyboardButton("♾️Утром, днём и вечером", callback_data='daily_in_three')],
         [InlineKeyboardButton("⬅️Назад", callback_data='back_to_daily_on')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
