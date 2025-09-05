@@ -222,7 +222,7 @@ async def button_handler(update: Update, context: CallbackContext):
 
     if data == 'show_config':
         kb = [
-            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_on')]
+            [InlineKeyboardButton('⬅️Назад', callback_data='back_to_daily_handler')]
         ]
         config = get_daily_config_without_time(update.effective_user.id)
         schedule_map = {

@@ -215,8 +215,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
                 )
 
             await update.message.reply_text(
-                    f'Отлично! Настройка рассылки <b>завершена<b>.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"{valute_for_message}\n'
-                    f'Теперь вы можете <b>отменить рассылку или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
+                    f'Отлично! Настройка рассылки <b>завершена</b>.\n Tип: "{daily_type_for_message}", город: "{user_data['daily_city']}"{valute_for_message}\n'
+                    f'Теперь вы можете <b>отменить рассылку</b> или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
                     f'<i>(доступно только премиум пользователям)</i>', reply_markup=get_main_keyboard(update), parse_mode='HTML')
             user_data['daily_city'] = None
             user_data['daily_valute'] = None
@@ -293,8 +293,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
                 await update.message.reply_text(
 
-                    f'Отлично! Настройка рассылки <b>завершена<b>.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
-                    f'Теперь вы можете <b>отменить рассылку или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
+                    f'Отлично! Настройка рассылки <b>завершена</b>.\n Tип: "{daily_type_for_message}", валюта: "{user_data['daily_valute']}"\n'
+                    f'Теперь вы можете <b>отменить рассылку</b> или <b>добавить</b> свое время и несколько валют и городов для рассылок\n'
                     f'<i>(доступно только премиум пользователям)</i>', reply_markup=get_main_keyboard(update), parse_mode='HTML')
                 user_data['daily_valute'] = None
                 user_data['daily_city'] = None
